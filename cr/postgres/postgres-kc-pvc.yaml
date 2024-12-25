@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-kc-pvc
+  namespace: bamoe-k8s
+spec:
+  storageClassName: ""
+  volumeName: postgres-kc-pv
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

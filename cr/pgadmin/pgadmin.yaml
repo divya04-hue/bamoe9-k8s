@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: bamoe-k8s
+spec:
+  selector:
+   matchLabels:
+    app: pgadmin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin4
+          image: 'dpage/pgadmin4:8.13.0'
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: admin@example.com
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: admin
+            - name: PGADMIN_PORT
+              value: "80"
+            - name: PGADMIN_SERVER_JSON_FILE
+              value: "/pgadmin4/myconfig/servers.json"
+            - name: PGPASS_FILE
+              value: "/pgadmin4/myconfig/pgpass"
+          ports:
+            - containerPort: 80
+              name: pgadminport
+          volumeMounts:
+            - name: pgadmin-config
+              mountPath: /pgadmin4/myconfig
+      volumes:
+        - name: pgadmin-config
+          configMap:
+            name: pgadmin-config       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: bamoe-k8s
+  labels:
+    app: pgadmin
+spec:
+  selector:
+    app: pgadmin
+  type: NodePort
+  ports:
+    - nodePort: 45200
+      port: 80
+      targetPort: 80

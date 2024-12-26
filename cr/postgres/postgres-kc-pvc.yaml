@@ -5,7 +5,7 @@ metadata:
   namespace: bamoe-k8s
 spec:
   storageClassName: ""
-  volumeName: postgres-kc-pv
+  volumeName: postgres-kc
   accessModes:
   - ReadWriteOnce
   resources:

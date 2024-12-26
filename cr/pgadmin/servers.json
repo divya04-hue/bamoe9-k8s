@@ -7,7 +7,8 @@
       "Port": 5432,
       "MaintenanceDB": "postgres",
       "Username": "postgres",
-      "SSLMode": "disable"
+      "SSLMode": "disable",
+      "PassFile": "/pgadmin4/myconfig/pgpass"
     },
     "2": {
       "Name": "kogito",
@@ -16,7 +17,8 @@
       "Port": 5432,
       "MaintenanceDB": "kogito",
       "Username": "kogito-user",
-      "SSLMode": "disable"
+      "SSLMode": "disable",
+      "PassFile": "/pgadmin4/myconfig/pgpass"
     }
   }
 }

@@ -27,7 +27,7 @@ EOF
 
 # PV
 _FOLDER=./cr/postgres
-_CR_NAME_PV=postgres-bamoe-pv
+_CR_NAME_PV=postgres-bamoe
 
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_PV}.yaml
 apiVersion: v1
@@ -44,7 +44,7 @@ spec:
 EOF
 
 _FOLDER=./cr/postgres
-_CR_NAME_KC_PV=postgres-kc-pv
+_CR_NAME_KC_PV=postgres-kc
 
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_KC_PV}.yaml
 apiVersion: v1
@@ -145,7 +145,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: 'postgres:16.1-alpine3.19'
+          image: 'postgres'
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
@@ -158,10 +158,15 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgresdata
+            - mountPath: /docker-entrypoint-initdb.d
+              name: pg-init-db
       volumes:
         - name: postgresdata
           persistentVolumeClaim:
             claimName: ${_CR_NAME_PVC}
+        - name: pg-init-db
+          configMap:
+            name: pg-init-db    
 ---
 apiVersion: v1
 kind: Service
@@ -206,11 +211,12 @@ cat <<EOF > ./cr/pgadmin/servers.json
   }
 }
 EOF
-  
+
 cat <<EOF > ./cr/pgadmin/pgpass
-postgres:5432:postgres:myPgPassword
-postgres:5432:keycloak:${_PG_USER}:${_PG_PWD}
-postgres:5432:kogito:kogito-user:kogito-pass
+postgres:5432:postgres:postgres:myPgPassword
+postgres:5432:bamoe:postgres:myPgPassword
+postgres:5432:keycloak:postgres:myPgPassword
+postgres:5432:kogito:postgres:myPgPassword
 EOF
 
 _FOLDER=./cr/pgadmin
@@ -280,8 +286,6 @@ EOF
 #------------------------------
 # Keycloak
 
-??? creare DB se non eistente ?
-
 _FOLDER=./cr/keycloak
 _CR_NAME_DEP_KC=keycloak
 _REALM_NAME=custom-realm
@@ -343,13 +347,20 @@ EOF
 
 #---------------------------------------------------------
 
+kubectl delete ns bamoe-k8s
+kubectl delete pv postgres-bamoe-pv postgres-kc-pv
+
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 
-kubectl apply -f ./cr/postgres/postgres-bamoe-pv.yaml 
+kubectl apply -f ./cr/postgres/postgres-bamoe.yaml 
 kubectl apply -f ./cr/postgres/postgres-bamoe-pvc.yaml 
 
-kubectl apply -f ./cr/postgres/postgres-kc-pv.yaml 
+kubectl apply -f ./cr/postgres/postgres-kc.yaml 
 kubectl apply -f ./cr/postgres/postgres-kc-pvc.yaml 
+
+kubectl apply -f ./cr/postgres/postgres-pwd-secret.yaml 
+
+kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres/init.sql
 
 kubectl apply -f ./cr/postgres/postgres.yaml 
 
@@ -360,7 +371,31 @@ _REALM_NAME=custom-realm
 kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
 kubectl apply -f ./cr/keycloak/keycloak.yaml 
 
-# da pod keycloak: cat /opt/keycloak/data/import/custom-realm.json
+
+
+#------------------------------------
+POSTGRES_POD=$(oc get pods -n bamoe-k8s --no-headers | grep postgres | awk '{print $1}')
+
+kubectl logs -f -n bamoe-k8s ${POSTGRES_POD}
+
+kubectl exec --stdin --tty -n bamoe-k8s ${POSTGRES_POD} -- /bin/bash
+
+cat /docker-entrypoint-initdb.d/init.sql
+
+PGPASSWORD=myPgPassword psql -h localhost -p 5432 -U postgres
+
+
+#------------------------------------
+PGADMIN_POD=$(oc get pods -n bamoe-k8s --no-headers | grep pgadmin | awk '{print $1}')
+kubectl exec --stdin --tty -n bamoe-k8s ${PGADMIN_POD} -- /bin/bash
+
+
+#------------------------------------
+KC_POD=$(oc get pods -n bamoe-k8s --no-headers | grep keycloak | awk '{print $1}')
+kubectl exec --stdin --tty -n bamoe-k8s ${KC_POD} -- /bin/bash
+
+cat /opt/keycloak/data/import/custom-realm.json
+
 
 #------------------------------------------------------------
 
@@ -380,5 +415,12 @@ postgresdb: postgres / myPgPassword
 
 kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
 
+# da pod postgres
+
 ```
+
+# RIVEDERE
+https://blog.brakmic.com/keycloak-with-postgresql-on-kubernetes/
+
+https://docs.redhat.com/en/documentation/red_hat_build_of_keycloak/22.0/html/operator_guide/basic-deployment-#basic-deployment-tls-certificate-and-key
 

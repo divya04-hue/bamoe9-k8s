@@ -189,7 +189,7 @@ cat <<EOF > ./cr/pgadmin/servers.json
 {
   "Servers": {
     "1": {
-      "Name": "postgres",
+      "Name": "my-databases",
       "Group": "Servers",
       "Host": "postgres",
       "Port": 5432,
@@ -197,18 +197,7 @@ cat <<EOF > ./cr/pgadmin/servers.json
       "Username": "postgres",
       "SSLMode": "disable",
       "PassFile": "/pgadmin4/myconfig/pgpass"
-    },
-    "2": {
-      "Name": "kogito",
-      "Group": "Servers",
-      "Host": "postgres",
-      "Port": 5432,
-      "MaintenanceDB": "kogito",
-      "Username": "kogito-user",
-      "SSLMode": "disable",
-      "PassFile": "/pgadmin4/myconfig/pgpass"
     }
-  }
 }
 EOF
 

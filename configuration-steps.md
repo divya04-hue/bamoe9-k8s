@@ -106,6 +106,7 @@ EOF
 # Postgres
 
 # Secret
+_PG_USER=postgres
 _PG_PWD=$(echo "myPgPassword" | base64 )
 
 _FOLDER=./cr/postgres
@@ -208,7 +209,7 @@ EOF
   
 cat <<EOF > ./cr/pgadmin/pgpass
 postgres:5432:postgres:myPgPassword
-postgres:5432:keycloak:kogito-user:kogito-pass
+postgres:5432:keycloak:${_PG_USER}:${_PG_PWD}
 postgres:5432:kogito:kogito-user:kogito-pass
 EOF
 
@@ -276,9 +277,71 @@ EOF
 
 
   
+#------------------------------
+# Keycloak
+
+??? creare DB se non eistente ?
+
+_FOLDER=./cr/keycloak
+_CR_NAME_DEP_KC=keycloak
+_REALM_NAME=custom-realm
+cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_KC}.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${_CR_NAME_DEP_KC}
+  namespace: ${_NS}
+spec:
+  selector:
+    app: ${_CR_NAME_DEP_KC}
+  type: NodePort
+  ports:
+    - nodePort: 45201
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${_CR_NAME_DEP_KC}
+  namespace: ${_NS}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${_CR_NAME_DEP_KC}
+  template:
+    metadata:
+      labels:
+        app: ${_CR_NAME_DEP_KC}
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:latest
+          args: ["start-dev", "--import-realm"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/keycloak
+            - name: KC_DB_USERNAME
+              value: ${_PG_USER}
+            - name: KC_DB_PASSWORD
+              value: myPgPassword
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm-config
+          configMap:
+            name: ${_REALM_NAME}
+EOF
+
 #---------------------------------------------------------
-
-
 
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 
@@ -292,6 +355,12 @@ kubectl apply -f ./cr/postgres/postgres.yaml
 
 kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json --from-file=pgpass=./cr/pgadmin/pgpass
 kubectl apply -f ./cr/pgadmin/pgadmin.yaml 
+
+_REALM_NAME=custom-realm
+kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
+kubectl apply -f ./cr/keycloak/keycloak.yaml 
+
+# da pod keycloak: cat /opt/keycloak/data/import/custom-realm.json
 
 #------------------------------------------------------------
 

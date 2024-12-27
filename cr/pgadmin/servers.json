@@ -10,4 +10,5 @@
       "SSLMode": "disable",
       "PassFile": "/pgadmin4/myconfig/pgpass"
     }
+  }
 }

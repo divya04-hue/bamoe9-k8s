@@ -29,37 +29,21 @@ EOF
 _FOLDER=./cr/postgres
 _CR_NAME_PV=postgres-bamoe
 
+_SUFFIX=$RANDOM
+
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_PV}.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: ${_CR_NAME_PV}
+  name: ${_CR_NAME_PV}${_SUFFIX}
 spec:
   accessModes:
     - ReadWriteOnce
   capacity:
     storage: 5Gi
   hostPath:
-    path: /data/${_CR_NAME_PV}/
+    path: /data/${_CR_NAME_PV}/${_SUFFIX}/
 EOF
-
-_FOLDER=./cr/postgres
-_CR_NAME_KC_PV=postgres-kc
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_KC_PV}.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: ${_CR_NAME_KC_PV}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 2Gi
-  hostPath:
-    path: /data/${_CR_NAME_KC_PV}/
-EOF
-
 
 # PVC
 _FOLDER=./cr/postgres
@@ -73,7 +57,7 @@ metadata:
   namespace: ${_NS}
 spec:
   storageClassName: ""
-  volumeName: ${_CR_NAME_PV}
+  volumeName: ${_CR_NAME_PV}${_SUFFIX}
   accessModes:
   - ReadWriteOnce
   resources:
@@ -81,26 +65,6 @@ spec:
       storage: 5Gi
 EOF
 
-
-# PVC
-_FOLDER=./cr/postgres
-_CR_NAME_KC_PVC=postgres-kc-pvc
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_KC_PVC}.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ${_CR_NAME_KC_PVC}
-  namespace: ${_NS}
-spec:
-  storageClassName: ""
-  volumeName: ${_CR_NAME_KC_PV}
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-EOF
 
 #------------------------------
 # Postgres
@@ -198,12 +162,12 @@ cat <<EOF > ./cr/pgadmin/servers.json
       "SSLMode": "disable",
       "PassFile": "/pgadmin4/myconfig/pgpass"
     }
+  }
 }
 EOF
 
 cat <<EOF > ./cr/pgadmin/pgpass
 postgres:5432:postgres:postgres:myPgPassword
-postgres:5432:bamoe:postgres:myPgPassword
 postgres:5432:keycloak:postgres:myPgPassword
 postgres:5432:kogito:postgres:myPgPassword
 EOF
@@ -284,6 +248,8 @@ kind: Service
 metadata:
   name: ${_CR_NAME_DEP_KC}
   namespace: ${_NS}
+  labels:
+    app: ${_CR_NAME_DEP_KC}
 spec:
   selector:
     app: ${_CR_NAME_DEP_KC}
@@ -334,18 +300,161 @@ spec:
             name: ${_REALM_NAME}
 EOF
 
+#------------------------------
+# BAMOE application
+
+_FOLDER=./cr/bamoe
+_CR_NAME_DEP_BAMOE=bamoe
+cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_BAMOE}.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${_CR_NAME_DEP_BAMOE}
+  namespace: ${_NS}
+  labels:
+    app: ${_CR_NAME_DEP_BAMOE}
+spec:
+  selector:
+    app: ${_CR_NAME_DEP_BAMOE}
+  type: NodePort
+  ports:
+    - nodePort: 45202
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${_CR_NAME_DEP_BAMOE}
+  namespace: ${_NS}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${_CR_NAME_DEP_BAMOE}
+  template:
+    metadata:
+      labels:
+        app: ${_CR_NAME_DEP_BAMOE}
+    spec:
+      containers:
+        - name: backend
+          image: quay.io/marco_antonioni/bamoe9-compact-architecture-security:1.0.0
+          env:
+            - name: KOGITO_DATA_INDEX_URL
+              value: 'http://0.0.0.0:8080'
+            - name: KOGITO_JOBS_SERVICE_URL
+              value: 'http://0.0.0.0:8080'
+            - name: KOGITO_PERSISTENCE_TYPE
+              value: jdbc
+            - name: KOGITO_SERVICE_URL
+              value: 'http://0.0.0.0:8080'
+            - name: QUARKUS_DATASOURCE_DB_KIND
+              value: postgresql
+            - name: QUARKUS_FLYWAY_BASELINE_ON_MIGRATE
+              value: 'true'
+            - name: QUARKUS_FLYWAY_BASELINE_VERSION
+              value: '0.0'
+            - name: QUARKUS_FLYWAY_LOCATIONS
+              value: 'classpath:/db/migration,classpath:/db/jobs-service,classpath:/db/data-audit/postgresql'
+            - name: QUARKUS_FLYWAY_MIGRATE_AT_START
+              value: 'true'
+            - name: QUARKUS_FLYWAY_TABLE
+              value: 'FLYWAY_RUNTIME_SERVICE'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_OIDC_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_OIDC_CLIENT_SCOPE
+              value: 'my-bpm-scope'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_PATHS
+              value: '/hiring/*,/graphql'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_POLICY
+              value: 'mybackendsecpolicy'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_ONLY_AUTHENTICATED
+              value: 'true'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_ONLY_LOCALHOST
+              value: 'true'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_SERVICE_HEADER
+              value: 'true'
+            - name: QUARKUS_HTTP_CORS
+              value: 'true'
+            - name: QUARKUS_HTTP_CORS_ORIGINS
+              value: '*'
+            - name: QUARKUS_KOGITO_DATA_INDEX_GRAPHQL_UI_ALWAYS_INCLUDE
+              value: 'true'
+            - name: QUARKUS_KOGITO_DEVSERVICES_ENABLED
+              value: 'false'
+            - name: QUARKUS_LOG_LEVEL
+              value: 'INFO'
+            - name: QUARKUS_OIDC_ENABLED
+              value: 'false'
+            - name: QUARKUS_SMALLRYE_OPENAPI_PATH
+              value: '/docs/openapi.json'
+            - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
+              value: 'false'
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://postgres:5432/kogito
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: jdbc:postgresql://postgres:5432/kogito
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: kogito-user
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: kogito-pass
+        - name: frontend
+          image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
+          env:
+            - name: MARCO_BAMOE_PROCESS_STARTER_ROLES_HIRING
+              value: 'HR'
+            - name: MARCO_BAMOE_PROCESS_VIEWER_ROLES
+              value: 'HR'
+            - name: MARCO_STUDIO_CACHE_NAME
+              value: 'myServiceId'
+            - name: MARCO_STUDIO_RESTCLIENT_MYBAMOERESTCLIENT_MP_REST_URL
+              value: 'http://localhost:8080'
+            - name: MARCO_STUDIO_VALIDATE_TOKEN_SCOPE
+              value: 'my-bpm-scope'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_EXPIRE_AFTER_WRITE
+              value: '10S'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_INITIAL_CAPACITY
+              value: '100'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_MAXIMUM_SIZE
+              value: '1000'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BAMOE_PATHS
+              value: '/bamoe/*'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BAMOE_POLICY
+              value: 'myfrontendsecpolicy'
+            - name: QUARKUS_HTTP_HOST
+              value: '0.0.0.0'
+            - name: QUARKUS_HTTP_PORT
+              value: '8880'
+            - name: QUARKUS_LOG_LEVEL
+              value: 'INFO'
+            - name: QUARKUS_OIDC_AUTH_SERVER_URL
+              value: 'http://keycloak:8080/realms/my-realm-1'
+            - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
+              value: 'http://keycloak:8080/realms/my-realm-1'
+            - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET
+              value: 'my-secret-bpm'
+            - name: QUARKUS_OIDC_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_OIDC_CREDENTIALS_SECRET
+              value: 'my-secret-bpm'
+            - name: QUARKUS_SMALLRYE_OPENAPI_PATH
+              value: '/docs/openapi.json'
+            - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
+              value: 'true'
+EOF
+
+
 #---------------------------------------------------------
 
 kubectl delete ns bamoe-k8s
-kubectl delete pv postgres-bamoe-pv postgres-kc-pv
 
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 
 kubectl apply -f ./cr/postgres/postgres-bamoe.yaml 
 kubectl apply -f ./cr/postgres/postgres-bamoe-pvc.yaml 
-
-kubectl apply -f ./cr/postgres/postgres-kc.yaml 
-kubectl apply -f ./cr/postgres/postgres-kc-pvc.yaml 
 
 kubectl apply -f ./cr/postgres/postgres-pwd-secret.yaml 
 
@@ -360,6 +469,7 @@ _REALM_NAME=custom-realm
 kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
 kubectl apply -f ./cr/keycloak/keycloak.yaml 
 
+kubectl apply -f ./cr/bamoe/bamoe.yaml 
 
 
 #------------------------------------
@@ -376,6 +486,9 @@ PGPASSWORD=myPgPassword psql -h localhost -p 5432 -U postgres
 
 #------------------------------------
 PGADMIN_POD=$(oc get pods -n bamoe-k8s --no-headers | grep pgadmin | awk '{print $1}')
+
+kubectl logs -f -n bamoe-k8s ${PGADMIN_POD}
+
 kubectl exec --stdin --tty -n bamoe-k8s ${PGADMIN_POD} -- /bin/bash
 
 
@@ -384,6 +497,15 @@ KC_POD=$(oc get pods -n bamoe-k8s --no-headers | grep keycloak | awk '{print $1}
 kubectl exec --stdin --tty -n bamoe-k8s ${KC_POD} -- /bin/bash
 
 cat /opt/keycloak/data/import/custom-realm.json
+
+#------------------------------------
+BAMOE_POD=$(oc get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
+
+kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
+
+kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
+
+kubectl exec --stdin --tty -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
 
 
 #------------------------------------------------------------
@@ -407,6 +529,25 @@ kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
 # da pod postgres
 
 ```
+
+```
+#!/bin/bash
+PROPERTIES_FILE=./src/main/resources/application.properties
+if [[ -f ${PROPERTIES_FILE} ]]; then
+  cat ${PROPERTIES_FILE} \
+    | sed 's/=.*//g' \
+    | sed 's/^%.*//g' \
+    | sed 's/^#.*//g' \
+    | sed '/^$/d' \
+    | sed 's/-/_/g' \
+    | sed 's/\//_/g' \
+    | sed 's/\./_/g' \
+    | sed 's/[a-z]/\U&/g' \
+    | sed 's/^/            - name: /g' \
+    | sort
+fi
+```
+
 
 # RIVEDERE
 https://blog.brakmic.com/keycloak-with-postgresql-on-kubernetes/

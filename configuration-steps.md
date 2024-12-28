@@ -571,9 +571,9 @@ cat /opt/keycloak/data/import/custom-realm.json
 #------------------------------------
 BAMOE_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
 
-kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
-
 kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
+
+kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
 
 kubectl exec --stdin --tty -c frontend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
 

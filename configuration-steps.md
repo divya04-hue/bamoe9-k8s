@@ -301,6 +301,8 @@ EOF
 #------------------------------
 # BAMOE application
 
+_OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
+
 _FOLDER=./cr/bamoe
 _CR_NAME_DEP_BAMOE=bamoe
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_BAMOE}.yaml
@@ -316,9 +318,14 @@ spec:
     app: ${_CR_NAME_DEP_BAMOE}
   type: NodePort
   ports:
-    - nodePort: 45202
+    - name: backend
+      nodePort: 45203
       port: 8080
       targetPort: 8080
+    - name: frontend
+      nodePort: 45202
+      port: 8880
+      targetPort: 8880
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -427,9 +434,9 @@ spec:
             - name: QUARKUS_LOG_LEVEL
               value: 'INFO'
             - name: QUARKUS_OIDC_AUTH_SERVER_URL
-              value: 'http://keycloak:8080/realms/my-realm-1'
+              value: '${_OIDC_REALM_URL}'
             - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
-              value: 'http://keycloak:8080/realms/my-realm-1'
+              value: '${_OIDC_REALM_URL}'
             - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
               value: 'my-client-bpm'
             - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET
@@ -499,9 +506,9 @@ cat /opt/keycloak/data/import/custom-realm.json
 #------------------------------------
 BAMOE_POD=$(oc get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
 
-kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
-
 kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
+
+kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
 
 kubectl exec --stdin --tty -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
 
@@ -528,6 +535,7 @@ kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
 
 ```
 
+## Template variabili pod
 ```
 #!/bin/bash
 PROPERTIES_FILE=./src/main/resources/application.properties

@@ -10,9 +10,14 @@ spec:
     app: bamoe
   type: NodePort
   ports:
-    - nodePort: 45202
+    - name: backend
+      nodePort: 45203
       port: 8080
       targetPort: 8080
+    - name: frontend
+      nodePort: 45202
+      port: 8880
+      targetPort: 8880
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -121,9 +126,9 @@ spec:
             - name: QUARKUS_LOG_LEVEL
               value: 'INFO'
             - name: QUARKUS_OIDC_AUTH_SERVER_URL
-              value: 'http://keycloak:8080/realms/my-realm-1'
+              value: 'http://192.168.49.2:45201/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
-              value: 'http://keycloak:8080/realms/my-realm-1'
+              value: 'http://192.168.49.2:45201/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
               value: 'my-client-bpm'
             - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET

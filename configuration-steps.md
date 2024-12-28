@@ -575,10 +575,6 @@ kubectl exec --stdin --tty -c backend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
 
 #------------------------------------------------------------
 
-kubectl delete pv postgres-bamoe-pv
-
-
-#--------------------------------
 
 # host minikube
 http://192.168.49.2:45200
@@ -595,7 +591,7 @@ kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
 
 ```
 
-## Template variabili pod
+## Template variables for pod/depl configuration
 ```
 #!/bin/bash
 PROPERTIES_FILE=./src/main/resources/application.properties
@@ -615,7 +611,7 @@ fi
 ```
 
 
-# RIVEDERE
+# Refs
 https://blog.brakmic.com/keycloak-with-postgresql-on-kubernetes/
 
 https://docs.redhat.com/en/documentation/red_hat_build_of_keycloak/22.0/html/operator_guide/basic-deployment-#basic-deployment-tls-certificate-and-key

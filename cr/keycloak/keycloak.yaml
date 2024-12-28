@@ -45,7 +45,10 @@ spec:
             - name: KC_DB_USERNAME
               value: postgres
             - name: KC_DB_PASSWORD
-              value: myPgPassword
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pwd-secret
+                  key: password            
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import

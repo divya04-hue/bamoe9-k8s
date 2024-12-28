@@ -69,7 +69,8 @@ EOF
 
 # Secret
 _PG_USER=postgres
-_PG_PWD=$(echo "myPgPassword" | base64 )
+_PG_PWD=myPgPassword
+_PG_PWD_ENC=$(echo "${_PG_PWD}" | base64 )
 
 _FOLDER=./cr/postgres
 _CR_NAME_SECR_PWD_POSTGRES=postgres-pwd-secret
@@ -82,7 +83,7 @@ metadata:
   namespace: ${_NS}
 type: Opaque
 data:
-  password: ${_PG_PWD}
+  password: ${_PG_PWD_ENC}
 EOF
 
 # Deployment
@@ -147,6 +148,51 @@ spec:
             name: pg-init-db    
 EOF
 
+# INIT.SQL
+_FOLDER=./cr/postgres
+_INIT_FILE=init.sql
+
+_BAMOE_DB_USER=bamoedb-user
+_BAMOE_DB_PASS=bamoedb-pass
+
+cat <<EOF > ./${_FOLDER}/${_INIT_FILE}
+CREATE ROLE "${_BAMOE_DB_USER}" WITH
+    LOGIN
+    SUPERUSER
+    INHERIT
+    CREATEDB
+    CREATEROLE
+    NOREPLICATION
+    PASSWORD '${_BAMOE_DB_PASS}';
+
+CREATE DATABASE bamoedb
+    WITH
+    OWNER = "${_BAMOE_DB_USER}"
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en_US.utf8'
+    LC_CTYPE = 'en_US.utf8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+
+CREATE DATABASE keycloak
+    WITH
+    OWNER = "${_BAMOE_DB_USER}"
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en_US.utf8'
+    LC_CTYPE = 'en_US.utf8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+
+GRANT ALL PRIVILEGES ON DATABASE postgres TO "${_BAMOE_DB_USER}";
+
+GRANT ALL PRIVILEGES ON DATABASE bamoe TO "${_BAMOE_DB_USER}";
+GRANT ALL PRIVILEGES ON DATABASE bamoe TO postgres;
+
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO "${_BAMOE_DB_USER}";
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO postgres;
+EOF
+
+
 # PGADMIN
 cat <<EOF > ./cr/pgadmin/servers.json
 {
@@ -157,7 +203,7 @@ cat <<EOF > ./cr/pgadmin/servers.json
       "Host": "${_CR_NAME_DEP_POSTGRES",
       "Port": ${_CR_NAME_DEP_POSTGRES_PORT},
       "MaintenanceDB": "postgres",
-      "Username": "postgres",
+      "Username": "${_PG_USER}",
       "SSLMode": "disable",
       "PassFile": "/pgadmin4/myconfig/pgpass"
     }
@@ -166,9 +212,9 @@ cat <<EOF > ./cr/pgadmin/servers.json
 EOF
 
 cat <<EOF > ./cr/pgadmin/pgpass
-${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:postgres:postgres:myPgPassword
-${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:keycloak:postgres:myPgPassword
-${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:kogito:postgres:myPgPassword
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:postgres:${_PG_USER}:${_PG_PWD}
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:keycloak:${_PG_USER}:${_PG_PWD}
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:bamoedb:${_PG_USER}:${_PG_PWD}
 EOF
 
 _FOLDER=./cr/pgadmin
@@ -289,7 +335,10 @@ spec:
             - name: KC_DB_USERNAME
               value: ${_PG_USER}
             - name: KC_DB_PASSWORD
-              value: myPgPassword
+              valueFrom:
+                secretKeyRef:
+                  name: ${_CR_NAME_SECR_PWD_POSTGRES}
+                  key: password            
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import
@@ -306,13 +355,14 @@ _OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
 
 # !!! PAY ATTENTION HERE 
 
-_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/kogito
+_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
 # The reactive datsource value MUST not have 'jdbc:' prefix as from https://access.redhat.com/solutions/7011882
-_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/kogito
+_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
 
 
 _FOLDER=./cr/bamoe
 _CR_NAME_DEP_BAMOE=bamoe
+
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_BAMOE}.yaml
 apiVersion: v1
 kind: Service
@@ -409,9 +459,9 @@ spec:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
               value: ${_QUARKUS_DS_REACTIVE_URL}
             - name: QUARKUS_DATASOURCE_USERNAME
-              value: kogito-user
+              value: ${_BAMOE_DB_USER}
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: kogito-pass
+              value: ${_BAMOE_DB_PASS}
         - name: frontend
           image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
           env:
@@ -486,7 +536,7 @@ kubectl apply -f ./cr/bamoe/bamoe.yaml
 
 
 #------------------------------------
-POSTGRES_POD=$(oc get pods -n bamoe-k8s --no-headers | grep postgres | awk '{print $1}')
+POSTGRES_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep postgres | awk '{print $1}')
 
 kubectl logs -f -n bamoe-k8s ${POSTGRES_POD}
 
@@ -498,7 +548,7 @@ PGPASSWORD=myPgPassword psql -h localhost -p 5432 -U postgres
 
 
 #------------------------------------
-PGADMIN_POD=$(oc get pods -n bamoe-k8s --no-headers | grep pgadmin | awk '{print $1}')
+PGADMIN_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep pgadmin | awk '{print $1}')
 
 kubectl logs -f -n bamoe-k8s ${PGADMIN_POD}
 
@@ -506,13 +556,13 @@ kubectl exec --stdin --tty -n bamoe-k8s ${PGADMIN_POD} -- /bin/bash
 
 
 #------------------------------------
-KC_POD=$(oc get pods -n bamoe-k8s --no-headers | grep keycloak | awk '{print $1}')
+KC_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep keycloak | awk '{print $1}')
 kubectl exec --stdin --tty -n bamoe-k8s ${KC_POD} -- /bin/bash
 
 cat /opt/keycloak/data/import/custom-realm.json
 
 #------------------------------------
-BAMOE_POD=$(oc get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
+BAMOE_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
 
 kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
 

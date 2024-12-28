@@ -1,46 +1,34 @@
-CREATE ROLE "kogito-user" WITH
+CREATE ROLE "bamoedb-user" WITH
     LOGIN
     SUPERUSER
     INHERIT
     CREATEDB
     CREATEROLE
     NOREPLICATION
-    PASSWORD 'kogito-pass';
+    PASSWORD 'bamoedb-pass';
 
-CREATE DATABASE kogito
+CREATE DATABASE bamoedb
     WITH
-    OWNER = "kogito-user"
+    OWNER = "bamoedb-user"
     ENCODING = 'UTF8'
     LC_COLLATE = 'en_US.utf8'
     LC_CTYPE = 'en_US.utf8'
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
-
--- CREATE DATABASE bamoe
---     WITH
---     OWNER = "kogito-user"
---     ENCODING = 'UTF8'
---     LC_COLLATE = 'en_US.utf8'
---     LC_CTYPE = 'en_US.utf8'
---     TABLESPACE = pg_default
---     CONNECTION LIMIT = -1;
 
 CREATE DATABASE keycloak
     WITH
-    OWNER = "kogito-user"
+    OWNER = "bamoedb-user"
     ENCODING = 'UTF8'
     LC_COLLATE = 'en_US.utf8'
     LC_CTYPE = 'en_US.utf8'
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
 
-GRANT ALL PRIVILEGES ON DATABASE postgres TO "kogito-user";
+GRANT ALL PRIVILEGES ON DATABASE postgres TO "bamoedb-user";
 
-GRANT ALL PRIVILEGES ON DATABASE kogito TO "kogito-user";
-GRANT ALL PRIVILEGES ON DATABASE kogito TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE bamoe TO "bamoedb-user";
+GRANT ALL PRIVILEGES ON DATABASE bamoe TO postgres;
 
--- GRANT ALL PRIVILEGES ON DATABASE bamoe TO "kogito-user";
--- GRANT ALL PRIVILEGES ON DATABASE bamoe TO postgres;
-
-GRANT ALL PRIVILEGES ON DATABASE keycloak TO "kogito-user";
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO "bamoedb-user";
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO postgres;

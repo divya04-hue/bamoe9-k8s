@@ -89,13 +89,13 @@ spec:
             - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
               value: 'false'
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: jdbc:postgresql://postgres:5432/kogito
+              value: jdbc:postgresql://postgres:5432/bamoedb
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: postgresql://postgres:5432/kogito
+              value: postgresql://postgres:5432/bamoedb
             - name: QUARKUS_DATASOURCE_USERNAME
-              value: kogito-user
+              value: bamoedb-user
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: kogito-pass
+              value: bamoedb-pass
         - name: frontend
           image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
           env:

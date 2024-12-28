@@ -29,20 +29,18 @@ EOF
 _FOLDER=./cr/postgres
 _CR_NAME_PV=postgres-bamoe
 
-_SUFFIX=$RANDOM
-
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_PV}.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: ${_CR_NAME_PV}${_SUFFIX}
+  name: ${_CR_NAME_PV}
 spec:
   accessModes:
     - ReadWriteOnce
   capacity:
     storage: 5Gi
   hostPath:
-    path: /data/${_CR_NAME_PV}/${_SUFFIX}/
+    path: /data/${_CR_NAME_PV}
 EOF
 
 # PVC
@@ -57,7 +55,7 @@ metadata:
   namespace: ${_NS}
 spec:
   storageClassName: ""
-  volumeName: ${_CR_NAME_PV}${_SUFFIX}
+  volumeName: ${_CR_NAME_PV}
   accessModes:
   - ReadWriteOnce
   resources:

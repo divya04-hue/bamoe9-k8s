@@ -513,6 +513,13 @@ EOF
 #---------------------------------------------------------
 
 kubectl delete ns bamoe-k8s
+kubectl delete pv postgres-bamoe
+
+# if minikube remove PV storage from hostPath
+    minikube ssh
+    cd /data
+    sudo rm -fr ./postgres-bamoe
+    exit
 
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 

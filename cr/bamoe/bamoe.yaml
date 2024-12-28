@@ -91,7 +91,7 @@ spec:
             - name: QUARKUS_DATASOURCE_JDBC_URL
               value: jdbc:postgresql://postgres:5432/kogito
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: jdbc:postgresql://postgres:5432/kogito
+              value: postgresql://postgres:5432/kogito
             - name: QUARKUS_DATASOURCE_USERNAME
               value: kogito-user
             - name: QUARKUS_DATASOURCE_PASSWORD

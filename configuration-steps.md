@@ -88,8 +88,24 @@ EOF
 # Deployment
 _FOLDER=./cr/postgres
 _CR_NAME_DEP_POSTGRES=postgres
+_CR_NAME_DEP_POSTGRES_PORT=5432
 
 cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_POSTGRES}.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${_CR_NAME_DEP_POSTGRES}
+  namespace: ${_NS}
+  labels:
+    app: ${_CR_NAME_DEP_POSTGRES}
+spec:
+  selector:
+    app: ${_CR_NAME_DEP_POSTGRES}
+  ports:
+    - protocol: TCP
+      port: ${_CR_NAME_DEP_POSTGRES_PORT}
+      targetPort: ${_CR_NAME_DEP_POSTGRES_PORT}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -110,7 +126,7 @@ spec:
           image: 'postgres'
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5432
+            - containerPort: ${_CR_NAME_DEP_POSTGRES_PORT}
           env:
             - name: POSTGRES_PASSWORD
               valueFrom:
@@ -129,21 +145,6 @@ spec:
         - name: pg-init-db
           configMap:
             name: pg-init-db    
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${_CR_NAME_DEP_POSTGRES}
-  namespace: ${_NS}
-  labels:
-    app: ${_CR_NAME_DEP_POSTGRES}
-spec:
-  selector:
-    app: ${_CR_NAME_DEP_POSTGRES}
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
 EOF
 
 # PGADMIN
@@ -153,8 +154,8 @@ cat <<EOF > ./cr/pgadmin/servers.json
     "1": {
       "Name": "my-databases",
       "Group": "Servers",
-      "Host": "postgres",
-      "Port": 5432,
+      "Host": "${_CR_NAME_DEP_POSTGRES",
+      "Port": ${_CR_NAME_DEP_POSTGRES_PORT},
       "MaintenanceDB": "postgres",
       "Username": "postgres",
       "SSLMode": "disable",
@@ -165,9 +166,9 @@ cat <<EOF > ./cr/pgadmin/servers.json
 EOF
 
 cat <<EOF > ./cr/pgadmin/pgpass
-postgres:5432:postgres:postgres:myPgPassword
-postgres:5432:keycloak:postgres:myPgPassword
-postgres:5432:kogito:postgres:myPgPassword
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:postgres:postgres:myPgPassword
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:keycloak:postgres:myPgPassword
+${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:kogito:postgres:myPgPassword
 EOF
 
 _FOLDER=./cr/pgadmin
@@ -284,7 +285,7 @@ spec:
             - name: KC_DB
               value: postgres
             - name: KC_DB_URL
-              value: jdbc:postgresql://postgres:5432/keycloak
+              value: jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/keycloak
             - name: KC_DB_USERNAME
               value: ${_PG_USER}
             - name: KC_DB_PASSWORD
@@ -302,6 +303,13 @@ EOF
 # BAMOE application
 
 _OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
+
+# !!! PAY ATTENTION HERE 
+
+_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/kogito
+# The reactive datsource value MUST not have 'jdbc:' prefix as from https://access.redhat.com/solutions/7011882
+_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/kogito
+
 
 _FOLDER=./cr/bamoe
 _CR_NAME_DEP_BAMOE=bamoe
@@ -397,9 +405,9 @@ spec:
             - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
               value: 'false'
             - name: QUARKUS_DATASOURCE_JDBC_URL
-              value: jdbc:postgresql://postgres:5432/kogito
+              value: ${_QUARKUS_DS_JDBC_URL}
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
-              value: jdbc:postgresql://postgres:5432/kogito
+              value: ${_QUARKUS_DS_REACTIVE_URL}
             - name: QUARKUS_DATASOURCE_USERNAME
               value: kogito-user
             - name: QUARKUS_DATASOURCE_PASSWORD
@@ -510,7 +518,9 @@ kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
 
 kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
 
-kubectl exec --stdin --tty -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
+kubectl exec --stdin --tty -c frontend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
+
+kubectl exec --stdin --tty -c backend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
 
 
 #------------------------------------------------------------

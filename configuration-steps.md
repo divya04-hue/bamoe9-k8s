@@ -204,8 +204,14 @@ cat <<EOF > ./cr/pgadmin/servers.json
       "Port": ${_CR_NAME_DEP_POSTGRES_PORT},
       "MaintenanceDB": "postgres",
       "Username": "${_PG_USER}",
-      "SSLMode": "disable",
-      "PassFile": "/pgadmin4/myconfig/my-passwords.pgpass"
+      "UseSSHTunnel": 0,
+      "TunnelPort": "22",
+      "TunnelAuthentication": 0,
+      "KerberosAuthentication": false,
+      "ConnectionParameters": {
+        "sslmode": "disable",
+        "passfile": "/pgadmin4/mypasswords/my-passwords.pgpass"
+      }
     }
   }
 }
@@ -250,17 +256,22 @@ spec:
             - name: PGADMIN_SERVER_JSON_FILE
               value: "/pgadmin4/myconfig/servers.json"
             - name: PGPASS_FILE
-              value: "/pgadmin4/myconfig/my-passwords.pgpass"
+              value: "/pgadmin4/mypasswords/my-passwords.pgpass"
           ports:
             - containerPort: 80
               name: pgadminport
           volumeMounts:
             - name: pgadmin-config
               mountPath: /pgadmin4/myconfig
+            - name: pgadmin-passwd
+              mountPath: /pgadmin4/mypasswords
       volumes:
         - name: pgadmin-config
           configMap:
             name: pgadmin-config       
+        - name: pgadmin-passwd
+          configMap:
+            name: pgadmin-passwd       
 ---
 apiVersion: v1
 kind: Service
@@ -523,22 +534,28 @@ kubectl delete pv postgres-bamoe
 
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 
+#-----------------------
 kubectl apply -f ./cr/postgres/postgres-bamoe.yaml 
 kubectl apply -f ./cr/postgres/postgres-bamoe-pvc.yaml 
-
 kubectl apply -f ./cr/postgres/postgres-pwd-secret.yaml 
-
 kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres/init.sql
-
 kubectl apply -f ./cr/postgres/postgres.yaml 
 
-kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json --from-file=my-passwords.pgpass=./cr/pgadmin/my-passwords.pgpass
+#-----------------------
+kubectl delete deployment -n ${_NS} pgadmin
+kubectl delete configmap -n ${_NS} pgadmin-config
+kubectl delete configmap -n ${_NS} pgadmin-passwd
+
+kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json
+kubectl create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./cr/pgadmin/my-passwords.pgpass
 kubectl apply -f ./cr/pgadmin/pgadmin.yaml 
 
+#-----------------------
 _REALM_NAME=custom-realm
 kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
 kubectl apply -f ./cr/keycloak/keycloak.yaml 
 
+#-----------------------
 kubectl apply -f ./cr/bamoe/bamoe.yaml 
 
 

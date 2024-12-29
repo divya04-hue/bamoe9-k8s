@@ -7,8 +7,14 @@
       "Port": 5432,
       "MaintenanceDB": "postgres",
       "Username": "postgres",
-      "SSLMode": "disable",
-      "PassFile": "/pgadmin4/myconfig/my-passwords.pgpass"
+      "UseSSHTunnel": 0,
+      "TunnelPort": "22",
+      "TunnelAuthentication": 0,
+      "KerberosAuthentication": false,
+      "ConnectionParameters": {
+        "sslmode": "disable",
+        "passfile": "/pgadmin4/mypasswords/my-passwords.pgpass"
+      }
     }
   }
 }

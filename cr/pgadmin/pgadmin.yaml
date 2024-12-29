@@ -27,17 +27,22 @@ spec:
             - name: PGADMIN_SERVER_JSON_FILE
               value: "/pgadmin4/myconfig/servers.json"
             - name: PGPASS_FILE
-              value: "/pgadmin4/myconfig/my-passwords.pgpass"
+              value: "/pgadmin4/mypasswords/my-passwords.pgpass"
           ports:
             - containerPort: 80
               name: pgadminport
           volumeMounts:
             - name: pgadmin-config
               mountPath: /pgadmin4/myconfig
+            - name: pgadmin-passwd
+              mountPath: /pgadmin4/mypasswords
       volumes:
         - name: pgadmin-config
           configMap:
             name: pgadmin-config       
+        - name: pgadmin-passwd
+          configMap:
+            name: pgadmin-passwd       
 ---
 apiVersion: v1
 kind: Service

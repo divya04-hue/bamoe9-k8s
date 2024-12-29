@@ -1,15 +1,50 @@
 
-# Configuration steps
+# Configuration steps to deploy into K8S (this scenario: minikube)
 
+Following snippets are used to generate CRs for various components.
+
+Before run any command set all variables in shell env.
+
+## Environment variables
 ```
-# minikube
-
-#--------------------------
-# namespace
+_FOLDER=./k8s-CRs
 
 _NS=bamoe-k8s
-_FOLDER=./cr
 
+_CR_NAME_PV=postgres-bamoe-pv
+_CR_NAME_PVC=postgres-bamoe-pvc
+
+_PG_USER=postgres
+_PG_PWD=myPgPassword
+_PG_PWD_ENC=$(echo "${_PG_PWD}" | base64 )
+
+_CR_NAME_SECR_PWD_POSTGRES=postgres-pwd-secret
+
+_CR_NAME_DEP_POSTGRES=postgres
+_CR_NAME_DEP_POSTGRES_PORT=5432
+
+_INIT_DB_FILE=init.sql
+
+_BAMOE_DB_USER=bamoedb-user
+_BAMOE_DB_PASS=bamoedb-pass
+
+_CR_NAME_DEP_PGADMIN=pgadmin
+
+_CR_NAME_DEP_KC=keycloak
+_REALM_NAME=custom-realm
+
+_OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
+
+_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
+
+# The reactive datsource value MUST not have 'jdbc:' prefix as from https://access.redhat.com/solutions/7011882
+_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
+
+_CR_NAME_DEP_BAMOE=bamoe
+```
+
+## namespace
+```
 cat <<EOF > ./${_FOLDER}/${_NS}.yaml
 kind: Namespace
 apiVersion: v1
@@ -21,15 +56,14 @@ spec:
   finalizers:
     - kubernetes
 EOF
+```
 
 #--------------------------
-# storage
+## storage
 
-# PV
-_FOLDER=./cr/postgres
-_CR_NAME_PV=postgres-bamoe
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_PV}.yaml
+### PV
+```
+cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PV}.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -42,12 +76,11 @@ spec:
   hostPath:
     path: /data/${_CR_NAME_PV}
 EOF
+```
 
-# PVC
-_FOLDER=./cr/postgres
-_CR_NAME_PVC=postgres-bamoe-pvc
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_PVC}.yaml
+### PVC
+```
+cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -62,20 +95,13 @@ spec:
     requests:
       storage: 5Gi
 EOF
+```
 
+## Postgres
 
-#------------------------------
-# Postgres
-
-# Secret
-_PG_USER=postgres
-_PG_PWD=myPgPassword
-_PG_PWD_ENC=$(echo "${_PG_PWD}" | base64 )
-
-_FOLDER=./cr/postgres
-_CR_NAME_SECR_PWD_POSTGRES=postgres-pwd-secret
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_SECR_PWD_POSTGRES}.yaml
+### Secret
+```
+cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_SECR_PWD_POSTGRES}.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -85,13 +111,11 @@ type: Opaque
 data:
   password: ${_PG_PWD_ENC}
 EOF
+```
 
-# Deployment
-_FOLDER=./cr/postgres
-_CR_NAME_DEP_POSTGRES=postgres
-_CR_NAME_DEP_POSTGRES_PORT=5432
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_POSTGRES}.yaml
+#### Deployment
+```
+cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -147,15 +171,11 @@ spec:
           configMap:
             name: pg-init-db    
 EOF
+```
 
-# INIT.SQL
-_FOLDER=./cr/postgres
-_INIT_FILE=init.sql
-
-_BAMOE_DB_USER=bamoedb-user
-_BAMOE_DB_PASS=bamoedb-pass
-
-cat <<EOF > ./${_FOLDER}/${_INIT_FILE}
+### INIT.SQL
+```
+cat <<EOF > ./${_FOLDER}/postgres/${_INIT_DB_FILE}
 CREATE ROLE "${_BAMOE_DB_USER}" WITH
     LOGIN
     SUPERUSER
@@ -191,10 +211,13 @@ GRANT ALL PRIVILEGES ON DATABASE bamoe TO postgres;
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO "${_BAMOE_DB_USER}";
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO postgres;
 EOF
+```
 
+## PGADMIN
 
-# PGADMIN
-cat <<EOF > ./cr/pgadmin/servers.json
+### Servers
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/servers.json
 {
   "Servers": {
     "1": {
@@ -216,17 +239,20 @@ cat <<EOF > ./cr/pgadmin/servers.json
   }
 }
 EOF
+```
 
-cat <<EOF > ./cr/pgadmin/my-passwords.pgpass
+### pgpass
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/my-passwords.pgpass
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:postgres:${_PG_USER}:${_PG_PWD}
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:keycloak:${_PG_USER}:${_PG_PWD}
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:bamoedb:${_PG_USER}:${_PG_PWD}
 EOF
+```
 
-_FOLDER=./cr/pgadmin
-_CR_NAME_DEP_PGADMIN=pgadmin
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_PGADMIN}.yaml
+### Deployment
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -289,16 +315,11 @@ spec:
       port: 80
       targetPort: 80
 EOF
+```
 
-
-  
-#------------------------------
-# Keycloak
-
-_FOLDER=./cr/keycloak
-_CR_NAME_DEP_KC=keycloak
-_REALM_NAME=custom-realm
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_KC}.yaml
+## Keycloak
+```
+cat <<EOF > ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -358,23 +379,11 @@ spec:
           configMap:
             name: ${_REALM_NAME}
 EOF
+```
 
-#------------------------------
-# BAMOE application
-
-_OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
-
-# !!! PAY ATTENTION HERE 
-
-_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
-# The reactive datsource value MUST not have 'jdbc:' prefix as from https://access.redhat.com/solutions/7011882
-_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
-
-
-_FOLDER=./cr/bamoe
-_CR_NAME_DEP_BAMOE=bamoe
-
-cat <<EOF > ./${_FOLDER}/${_CR_NAME_DEP_BAMOE}.yaml
+## BAMOE application
+```
+cat <<EOF > ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -519,128 +528,7 @@ spec:
             - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
               value: 'true'
 EOF
-
-
-#---------------------------------------------------------
-
-kubectl delete ns bamoe-k8s
-kubectl delete pv postgres-bamoe
-
-# if minikube remove PV storage from hostPath
-    minikube ssh
-    cd /data
-    sudo rm -fr ./postgres-bamoe
-    exit
-
-kubectl apply -f ./cr/bamoe-k8s.yaml 
-
-#-----------------------
-kubectl delete configmap -n ${_NS} pg-init-db
-
-kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres/init.sql
-kubectl apply -f ./cr/postgres/postgres-bamoe.yaml 
-kubectl apply -f ./cr/postgres/postgres-bamoe-pvc.yaml 
-kubectl apply -f ./cr/postgres/postgres-pwd-secret.yaml 
-kubectl apply -f ./cr/postgres/postgres.yaml 
-
-#-----------------------
-kubectl delete deployment -n ${_NS} pgadmin
-kubectl delete configmap -n ${_NS} pgadmin-config
-kubectl delete configmap -n ${_NS} pgadmin-passwd
-
-kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json
-kubectl create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./cr/pgadmin/my-passwords.pgpass
-kubectl apply -f ./cr/pgadmin/pgadmin.yaml 
-
-#-----------------------
-_REALM_NAME=custom-realm
-kubectl delete configmap -n ${_NS} ${_REALM_NAME}
-
-kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
-kubectl apply -f ./cr/keycloak/keycloak.yaml 
-
-#-----------------------
-kubectl apply -f ./cr/bamoe/bamoe.yaml 
-
-
-#------------------------------------
-POSTGRES_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep postgres | awk '{print $1}')
-
-kubectl logs -f -n bamoe-k8s ${POSTGRES_POD}
-
-kubectl exec --stdin --tty -n bamoe-k8s ${POSTGRES_POD} -- /bin/bash
-
-cat /docker-entrypoint-initdb.d/init.sql
-
-PGPASSWORD=myPgPassword psql -h localhost -p 5432 -U postgres
-
-
-#------------------------------------
-PGADMIN_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep pgadmin | awk '{print $1}')
-
-kubectl logs -f -n bamoe-k8s ${PGADMIN_POD}
-
-kubectl exec --stdin --tty -n bamoe-k8s ${PGADMIN_POD} -- /bin/bash
-
-
-#------------------------------------
-KC_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep keycloak | awk '{print $1}')
-kubectl exec --stdin --tty -n bamoe-k8s ${KC_POD} -- /bin/bash
-
-cat /opt/keycloak/data/import/custom-realm.json
-
-#------------------------------------
-BAMOE_POD=$(kubectl get pods -n bamoe-k8s --no-headers | grep bamoe | awk '{print $1}')
-
-kubectl logs -f -c backend -n bamoe-k8s ${BAMOE_POD}
-
-kubectl logs -f -c frontend -n bamoe-k8s ${BAMOE_POD}
-
-kubectl exec --stdin --tty -c frontend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
-
-kubectl exec --stdin --tty -c backend -n bamoe-k8s ${BAMOE_POD} -- /bin/bash
-
-
-#------------------------------------------------------------
-
-
-# host minikube
-http://192.168.49.2:45200
-pgadmin console: admin@example.com / admin
-minikube service -n bamoe-k8s pgadmin --url
-  
-
-postgresdb: postgres / myPgPassword
-
-
-kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
-
-# da pod postgres
-
-```
-
-## Template variables for pod/depl configuration
-```
-#!/bin/bash
-PROPERTIES_FILE=./src/main/resources/application.properties
-if [[ -f ${PROPERTIES_FILE} ]]; then
-  cat ${PROPERTIES_FILE} \
-    | sed 's/=.*//g' \
-    | sed 's/^%.*//g' \
-    | sed 's/^#.*//g' \
-    | sed '/^$/d' \
-    | sed 's/-/_/g' \
-    | sed 's/\//_/g' \
-    | sed 's/\./_/g' \
-    | sed 's/[a-z]/\U&/g' \
-    | sed 's/^/            - name: /g' \
-    | sort
-fi
 ```
 
 
-# Refs
-https://blog.brakmic.com/keycloak-with-postgresql-on-kubernetes/
-
-https://docs.redhat.com/en/documentation/red_hat_build_of_keycloak/22.0/html/operator_guide/basic-deployment-#basic-deployment-tls-certificate-and-key
 

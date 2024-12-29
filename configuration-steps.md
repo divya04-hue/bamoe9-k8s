@@ -535,10 +535,12 @@ kubectl delete pv postgres-bamoe
 kubectl apply -f ./cr/bamoe-k8s.yaml 
 
 #-----------------------
+kubectl delete configmap -n ${_NS} pg-init-db
+
+kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres/init.sql
 kubectl apply -f ./cr/postgres/postgres-bamoe.yaml 
 kubectl apply -f ./cr/postgres/postgres-bamoe-pvc.yaml 
 kubectl apply -f ./cr/postgres/postgres-pwd-secret.yaml 
-kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres/init.sql
 kubectl apply -f ./cr/postgres/postgres.yaml 
 
 #-----------------------
@@ -552,6 +554,8 @@ kubectl apply -f ./cr/pgadmin/pgadmin.yaml
 
 #-----------------------
 _REALM_NAME=custom-realm
+kubectl delete configmap -n ${_NS} ${_REALM_NAME}
+
 kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./cr/keycloak/custom-realm.json 
 kubectl apply -f ./cr/keycloak/keycloak.yaml 
 

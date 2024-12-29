@@ -200,18 +200,18 @@ cat <<EOF > ./cr/pgadmin/servers.json
     "1": {
       "Name": "my-databases",
       "Group": "Servers",
-      "Host": "${_CR_NAME_DEP_POSTGRES",
+      "Host": "${_CR_NAME_DEP_POSTGRES}",
       "Port": ${_CR_NAME_DEP_POSTGRES_PORT},
       "MaintenanceDB": "postgres",
       "Username": "${_PG_USER}",
       "SSLMode": "disable",
-      "PassFile": "/pgadmin4/myconfig/pgpass"
+      "PassFile": "/pgadmin4/myconfig/my-passwords.pgpass"
     }
   }
 }
 EOF
 
-cat <<EOF > ./cr/pgadmin/pgpass
+cat <<EOF > ./cr/pgadmin/my-passwords.pgpass
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:postgres:${_PG_USER}:${_PG_PWD}
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:keycloak:${_PG_USER}:${_PG_PWD}
 ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:bamoedb:${_PG_USER}:${_PG_PWD}
@@ -250,7 +250,7 @@ spec:
             - name: PGADMIN_SERVER_JSON_FILE
               value: "/pgadmin4/myconfig/servers.json"
             - name: PGPASS_FILE
-              value: "/pgadmin4/myconfig/pgpass"
+              value: "/pgadmin4/myconfig/my-passwords.pgpass"
           ports:
             - containerPort: 80
               name: pgadminport
@@ -532,7 +532,7 @@ kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./cr/postgres
 
 kubectl apply -f ./cr/postgres/postgres.yaml 
 
-kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json --from-file=pgpass=./cr/pgadmin/pgpass
+kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./cr/pgadmin/servers.json --from-file=my-passwords.pgpass=./cr/pgadmin/my-passwords.pgpass
 kubectl apply -f ./cr/pgadmin/pgadmin.yaml 
 
 _REALM_NAME=custom-realm

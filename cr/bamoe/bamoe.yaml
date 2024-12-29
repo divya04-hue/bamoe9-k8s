@@ -95,7 +95,7 @@ spec:
             - name: QUARKUS_DATASOURCE_USERNAME
               value: bamoedb-user
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: bamoedb-pass
+              value: bamoedb-pass    
         - name: frontend
           image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
           env:
@@ -141,3 +141,4 @@ spec:
               value: '/docs/openapi.json'
             - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
               value: 'true'
+

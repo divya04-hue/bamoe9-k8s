@@ -92,17 +92,32 @@ Don't be alarmed if some pod will report one or more restarts, it will probably 
 
 1. Check the Postgres setup and the 'keycloak' and 'bamoe' databases
 
-...prendere screenshots
-<img src="./docs/Keycloak-Client.png" width="50%" height="50%">
+to. Login to the PGAdmin console with username 'admin@example.com' and password 'admin'
+ http://minikube:45200/
 
+b. Expand the 'Servers' group and enter password 'myPgPassword'
+<img src="./images/.png" width="50%" height="50%">
+
+c. Check presence of databases
+<img src="./images/.png" width="50%" height="50%">
+
+d. Check the presence of 'bamoedb' database tables, expand databases/bamoedb/schemas/public/tables (execute query-all and check for the presence of 'hiring' process)
+<img src="./images/.png" width="50%" height="50%">
+
+And. Check the presence of 'keycloak' database tables, expand databases/keycloak/schemas/public/tables (execute query-all and scroll to the 'realm' column)
+<img src="./images/.png" width="50%" height="50%">
 
 2. Check the custom realm configuration in Keycloak
 
-...prendere screenshots
+to. Login to the Keycloak console with username 'admin' and password 'admin'
+ http://minikube:45201/admin/master/console/
+<img src="./images/.png" width="50%" height="50%">
 
-3. Check the correct deployment of the 'hiring' process application
+b. Select realm 'my-realm-1'
+<img src="./images/.png" width="50%" height="50%">
 
-...prendere screenshots
+c. Select Realm Roles and verifiy the presence of 'HR' and 'IT'
+<img src="./images/.png" width="50%" height="50%">
 
 
 ## Run Process Instances

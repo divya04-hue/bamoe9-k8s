@@ -182,6 +182,25 @@ curl -v -H "Content-Type: application/json" -H "Accept: application/json" -H "Au
     -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}' | jq .
 ```
 
+the result will be similar to
+```
+< HTTP/1.1 200 OK
+< content-length: 108
+< Content-Type: application/json;charset=UTF-8
+< 
+{ [108 bytes data]
+100   246  100   108  100   138     74     95  0:00:01  0:00:01 --:--:--   169
+* Connection #0 to host minikube left intact
+{
+  "id": "81ced7e1-ffc2-4784-bd2f-fafe75e24650",
+  "offer": {
+    "category": "Senior Software Engineer",
+    "salary": 40450
+  }
+}
+```
+
+
 To complete the process with human tasks, adapt the 'curl' command examples found in the repository from the section https://github.com/marcoantonioni/bamoe9-oidc-processes#3-get-a-list-of-process-instances and following steps.
 
 

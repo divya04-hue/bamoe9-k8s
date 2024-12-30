@@ -92,31 +92,52 @@ Don't be alarmed if some pod will report one or more restarts, it will probably 
 
 1. Check the Postgres setup and the 'keycloak' and 'bamoe' databases
 
-a. Login to the PGAdmin console with username 'admin@example.com' and password 'admin'
+1.1 Login to the PGAdmin console with username 'admin@example.com' and password 'admin'
  http://minikube:45200/
 
-b. Expand the 'Servers' group and enter password 'myPgPassword'
+1.2 Expand the 'Servers' group and enter password 'myPgPassword'
+
 <img src="./images/.png" width="50%" height="50%">
 
-c. Check presence of databases
+1.3 Check presence of databases
+
 <img src="./images/.png" width="50%" height="50%">
 
-d. Check the presence of 'bamoedb' database tables, expand databases/bamoedb/schemas/public/tables (execute query-all and check for the presence of 'hiring' process)
+1.4 Check the presence of 'bamoedb' database tables
+
+Expand databases/bamoedb/schemas/public/tables 
+
+Select table 'definitions'
+
+Execute query-all and check for the presence of 'hiring' process
+
 <img src="./images/.png" width="50%" height="50%">
 
-And. Check the presence of 'keycloak' database tables, expand databases/keycloak/schemas/public/tables (execute query-all and scroll to the 'realm' column)
+1.5 Check the presence of 'keycloak' database tables
+
+Expand databases/keycloak/schemas/public/tables
+
+Select table 'realms'
+
+Execute query-all and scroll to the 'realm' column
+
 <img src="./images/.png" width="50%" height="50%">
+
 
 2. Check the custom realm configuration in Keycloak
 
-to. Login to the Keycloak console with username 'admin' and password 'admin'
+2.1 Login to the Keycloak console with username 'admin' and password 'admin'
+
  http://minikube:45201/admin/master/console/
+
 <img src="./images/.png" width="50%" height="50%">
 
-b. Select realm 'my-realm-1'
+2.2 Select realm 'my-realm-1'
+
 <img src="./images/.png" width="50%" height="50%">
 
-c. Select Realm Roles and verifiy the presence of 'HR' and 'IT'
+2.3 Select Realm Roles and verifiy the presence of 'HR' and 'IT'
+
 <img src="./images/.png" width="50%" height="50%">
 
 

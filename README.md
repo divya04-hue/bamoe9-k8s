@@ -66,6 +66,8 @@ In the 'k8s-CRs' folder there are all the CRs in yaml format ready to be deploye
 
 In the 'configuration/configuration-steps.md' file you will find a series of snippets for the creation of the various CRs starting from a series of environment variables defined in the 'env.properties' file.
 
+The log level for BAMOE applications are at 'INFO' level in 'QUARKUS_LOG_LEVEL' enviroment variables for each containers; change it to 'TRACE' if needed.
+
 <b>Warning</b>:
 <mark>
 Authentication and verification of the validity of the JWT token require (frontend policy) among other things that the token has been created from a specific URL that has been configured in the environment variable of the frontend container (QUARKUS_OIDC_AUTH_SERVER_URL and QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL).
@@ -84,64 +86,77 @@ The networking addressing between the various components uses only the name of t
 
 ## Verifications
 
-Al termine del deployment potete fare alcune verifiche di base.
-Non allarmatevi se qualche pod segnalerà uno o più restart, probabilmente sarà a causa dei tempi di setup del database Postgres.
+After the deployment of the various components you can do some basic checks.
 
-1. Verifica del setup di Postgres e dei database 'keycloak' e 'bamoe'
+Don't be alarmed if some pod will report one or more restarts, it will probably be due to the Postgres database setup delay times.
 
-2. Verifica della configurazione del realm custom in Keycloak
+1. Check the Postgres setup and the 'keycloak' and 'bamoe' databases
 
-3. Verifica del corretto deployment della applicazione di processo 'hiring'
+...prendere screenshots
+<img src="./docs/Keycloak-Client.png" width="50%" height="50%">
+
+
+2. Check the custom realm configuration in Keycloak
+
+...prendere screenshots
+
+3. Check the correct deployment of the 'hiring' process application
+
+...prendere screenshots
 
 
 ## Run Process Instances
+
+To start a process instance, perform the following two steps (change host/port as needed for your environment)
+
+1. Login to the Keycloak server (JWT token)
+```
+KC_HOST=minikube
+USER_NAME=alice
+USER_PWD=alice
+
+KC_PORT=45201
+KC_REALM=my-realm-1
+KC_CLIENT_USER=my-client-bpm
+KC_CLIENT_SECRET=my-secret-bpm
+KC_TOKEN_EXPIRATION=""
+KC_TOKEN_SCOPE=""
+
+KC_FULL_TOKEN=$(curl -sk -X POST http://${KC_HOST}:${KC_PORT}/realms/${KC_REALM}/protocol/openid-connect/token \
+  --user ${KC_CLIENT_USER}:${KC_CLIENT_SECRET} -H 'content-type: application/x-www-form-urlencoded' \
+  -d 'username='${USER_NAME}'&password='${USER_PWD}'&grant_type=password&scope=openid')
+
+if ([[ ! -z "${KC_FULL_TOKEN}" ]] && [[ "${KC_FULL_TOKEN}" != "null" ]]) then echo "Logged in"; else echo "Not logged in"; fi
+if ([[ ! -z "${KC_FULL_TOKEN}" ]] && [[ "${KC_FULL_TOKEN}" != "null" ]]) then KC_TOKEN=$(echo "${KC_FULL_TOKEN}" | jq '.access_token' | sed 's/"//g'); else KC_TOKEN=""; fi
+if ([[ ! -z "${KC_FULL_TOKEN}" ]] && [[ "${KC_FULL_TOKEN}" != "null" ]]) then KC_TOKEN_EXPIRATION=$(echo $KC_FULL_TOKEN | jq .expires_in | sed 's/"//g'); fi
+if ([[ ! -z "${KC_FULL_TOKEN}" ]] && [[ "${KC_FULL_TOKEN}" != "null" ]]) then KC_TOKEN_SCOPE=$(echo $KC_FULL_TOKEN | jq .scope | sed 's/"//g'); fi
+
+echo "Token expires in: ${KC_TOKEN_EXPIRATION}"
+echo "Token scopes: ${KC_TOKEN_SCOPE}"
+```
+
+
+2. Start a process instance
+```
+_BAMOE_FRONTEND_HOST=${KC_HOST}
+_BAMOE_FRONTEND_PORT=45202
+_PROCESS_NAME=hiring
+curl -v -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: Bearer "${KC_TOKEN} \
+  -X POST http://${_BAMOE_FRONTEND_HOST}:${_BAMOE_FRONTEND_PORT}/bamoe/process-instances/${_PROCESS_NAME} \
+    -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}' | jq .
+```
+
+To complete the process with human tasks, adapt the 'curl' command examples found in the repository from the section https://github.com/marcoantonioni/bamoe9-oidc-processes#3-get-a-list-of-process-instances and following steps.
+
 
 ## Conclusions
 
 ## References
 
+<a href="https://www.ibm.com/docs/en/ibamoe/9.1.x" target="_blank">IBM BAMOE v9.1 Docs</a>
 
-## TBD
-#------------------------------------------------------------
+<a href="https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=services-components-process-service" target="_blank">IBM BAMOE v9.1 Compact Architecture</a>
 
+<a href="https://ibm.biz/bamoe-developer-program" target="_blank">IBM BAMOE Developer Program</a>
 
-# host minikube
-http://minikube
-pgadmin console: admin@example.com / admin
-minikube service -n bamoe-k8s pgadmin --url
-  
-
-postgresdb: postgres / myPgPassword
-
-
-kubectl exec --stdin --tty -n bamoe-k8s pgadmin-cb8f795d9-8tbcl -- /bin/bash
-
-# da pod postgres
-
-```
-
-## Template variables for pod/depl configuration
-```
-#!/bin/bash
-PROPERTIES_FILE=./src/main/resources/application.properties
-if [[ -f ${PROPERTIES_FILE} ]]; then
-  cat ${PROPERTIES_FILE} \
-    | sed 's/=.*//g' \
-    | sed 's/^%.*//g' \
-    | sed 's/^#.*//g' \
-    | sed '/^$/d' \
-    | sed 's/-/_/g' \
-    | sed 's/\//_/g' \
-    | sed 's/\./_/g' \
-    | sed 's/[a-z]/\U&/g' \
-    | sed 's/^/            - name: /g' \
-    | sort
-fi
-```
-
-
-# Refs
-https://blog.brakmic.com/keycloak-with-postgresql-on-kubernetes/
-
-https://docs.redhat.com/en/documentation/red_hat_build_of_keycloak/22.0/html/operator_guide/basic-deployment-#basic-deployment-tls-certificate-and-key
 

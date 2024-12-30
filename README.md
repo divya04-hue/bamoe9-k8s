@@ -90,7 +90,7 @@ After the deployment of the various components you can do some basic checks.
 
 Don't be alarmed if some pod will report one or more restarts, it will probably be due to the Postgres database setup delay times.
 
-<b><u>1 Check the Postgres setup and the 'keycloak' and 'bamoe' databases</u></b>
+<b>1 Check the Postgres setup and the 'keycloak' and 'bamoe' databases</b>
 
 1.1 Login to the PGAdmin console with username 'admin@example.com' and password 'admin'
  http://minikube:45200/
@@ -124,7 +124,7 @@ Execute query-all and scroll to the 'realm' column
 <img src="./images/.png" width="50%" height="50%">
 
 
-<b><u>2 Check the custom realm configuration in Keycloak</u></b>
+<b>2 Check the custom realm configuration in Keycloak</b>
 
 2.1 Login to the Keycloak console with username 'admin' and password 'admin'
 

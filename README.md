@@ -97,6 +97,9 @@ Don't be alarmed if some pod will report one or more restarts, it will probably 
 
 1.2 Expand the 'Servers' group and enter password 'myPgPassword'
 
+
+TBD...
+
 <img src="./images/.png" width="50%" height="50%">
 
 1.3 Check presence of databases
@@ -205,6 +208,8 @@ To complete the process with human tasks, adapt the 'curl' command examples foun
 
 
 ## Conclusions
+
+TBD...
 
 ## References
 

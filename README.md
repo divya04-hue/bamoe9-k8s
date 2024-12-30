@@ -67,8 +67,8 @@ In the 'k8s-CRs' folder there are all the CRs in yaml format ready to be deploye
 In the 'configuration/configuration-steps.md' file you will find a series of snippets for the creation of the various CRs starting from a series of environment variables defined in the 'env.properties' file.
 
 <b>Warning</b>:
-Authentication and verification of the validity of the JWT token require (frontend policy) among other things that the token has been created from a specific URL that has been configured in the environment variable of the frontend container (QUARKUS_OIDC_AUTH_SERVER_URL and QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL).
 
+Authentication and verification of the validity of the JWT token require (frontend policy) among other things that the token has been created from a specific URL that has been configured in the environment variable of the frontend container (QUARKUS_OIDC_AUTH_SERVER_URL and QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL).
 In order to be authorized you will have to configure (even simply on the '/etc/hosts' file) an entry with the name 'minikube' and the IP address of your Minikube runtime. To obtain the IP of the Minikube instance, execute the command 'minikube ip'.
 The same goes for the port number assigned to the 'nodePort' of the various 'Service'; adapt them according to your needs.
 

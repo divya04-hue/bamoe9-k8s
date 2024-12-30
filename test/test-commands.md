@@ -1,11 +1,15 @@
 # Test commands
 
+```
+# minikube name/ip must be set in your /etc/hosts for OIDC url validation
+KC_HOST=minikube
+```
+
 ## Login token
 ```
 USER_NAME=alice
 USER_PWD=alice
 
-KC_HOST=192.168.49.2
 KC_PORT=45201
 KC_REALM=my-realm-1
 KC_CLIENT_USER=my-client-bpm
@@ -25,11 +29,10 @@ echo "Token scopes: ${KC_TOKEN_SCOPE}"
 
 ## Start process instance
 ```
-_BAMOE_FRONTEND_HOST=192.168.49.2
+_BAMOE_FRONTEND_HOST=${KC_HOST}
 _BAMOE_FRONTEND_PORT=45202
 _PROCESS_NAME=hiring
 curl -v -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: Bearer "${KC_TOKEN} \
   -X POST http://${_BAMOE_FRONTEND_HOST}:${_BAMOE_FRONTEND_PORT}/bamoe/process-instances/${_PROCESS_NAME} \
-    -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}' | jq .
-    
+    -d '{"candidateData": { "name": "Jon", "lastName": "Snow", "email": "jon@snow.org", "experience": 5, "skills": ["Java", "Kogito", "Fencing"]}}' | jq .    
 ```

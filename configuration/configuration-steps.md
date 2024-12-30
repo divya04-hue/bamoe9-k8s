@@ -7,40 +7,7 @@ Before run any command set all variables in shell env.
 
 ## Environment variables
 ```
-_FOLDER=./k8s-CRs
-
-_NS=bamoe-k8s
-
-_CR_NAME_PV=postgres-bamoe-pv
-_CR_NAME_PVC=postgres-bamoe-pvc
-
-_PG_USER=postgres
-_PG_PWD=myPgPassword
-_PG_PWD_ENC=$(echo "${_PG_PWD}" | base64 )
-
-_CR_NAME_SECR_PWD_POSTGRES=postgres-pwd-secret
-
-_CR_NAME_DEP_POSTGRES=postgres
-_CR_NAME_DEP_POSTGRES_PORT=5432
-
-_INIT_DB_FILE=init.sql
-
-_BAMOE_DB_USER=bamoedb-user
-_BAMOE_DB_PASS=bamoedb-pass
-
-_CR_NAME_DEP_PGADMIN=pgadmin
-
-_CR_NAME_DEP_KC=keycloak
-_REALM_NAME=custom-realm
-
-_OIDC_REALM_URL=http://192.168.49.2:45201/realms/my-realm-1
-
-_QUARKUS_DS_JDBC_URL=jdbc:postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
-
-# The reactive datsource value MUST not have 'jdbc:' prefix as from https://access.redhat.com/solutions/7011882
-_QUARKUS_DS_REACTIVE_URL=postgresql://${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}/bamoedb
-
-_CR_NAME_DEP_BAMOE=bamoe
+source ./env.properties
 ```
 
 ## namespace
@@ -253,6 +220,22 @@ EOF
 ### Deployment
 ```
 cat <<EOF > ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${_CR_NAME_DEP_PGADMIN}
+  namespace: ${_NS}
+  labels:
+    app: ${_CR_NAME_DEP_PGADMIN}
+spec:
+  selector:
+    app: ${_CR_NAME_DEP_PGADMIN}
+  type: NodePort
+  ports:
+    - nodePort: ${_PGADMIN_NODE_PORT}
+      port: 80
+      targetPort: 80
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -298,22 +281,6 @@ spec:
         - name: pgadmin-passwd
           configMap:
             name: pgadmin-passwd       
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${_CR_NAME_DEP_PGADMIN}
-  namespace: ${_NS}
-  labels:
-    app: ${_CR_NAME_DEP_PGADMIN}
-spec:
-  selector:
-    app: ${_CR_NAME_DEP_PGADMIN}
-  type: NodePort
-  ports:
-    - nodePort: 45200
-      port: 80
-      targetPort: 80
 EOF
 ```
 
@@ -332,7 +299,7 @@ spec:
     app: ${_CR_NAME_DEP_KC}
   type: NodePort
   ports:
-    - nodePort: 45201
+    - nodePort: ${_KC_NODE_PORT}
       port: 8080
       targetPort: 8080
 ---
@@ -397,11 +364,11 @@ spec:
   type: NodePort
   ports:
     - name: backend
-      nodePort: 45203
+      nodePort: ${_BAMOE_BACKEND_NODE_PORT}
       port: 8080
       targetPort: 8080
     - name: frontend
-      nodePort: 45202
+      nodePort: ${_BAMOE_FRONTEND_NODE_PORT}
       port: 8880
       targetPort: 8880
 ---

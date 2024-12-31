@@ -129,9 +129,7 @@ Execute 'all-rows' command and scroll right to the '<b>NAME</b>' column, check f
 
 <b>2 Check the custom realm configuration in Keycloak</b>
 
-2.1 Login to the Keycloak console with username 'admin' and password 'admin'
-
- http://minikube:45201/admin/master/console/
+2.1 Login to the Keycloak console http://minikube:45201/ with username '<b>admin</b>' and password '<b>admin</b>' 
 
 2.2 Select realm 'my-realm-1'
 

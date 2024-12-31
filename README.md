@@ -112,7 +112,7 @@ Select table 'definitions'
 
 Execute 'query-all' command and check for the presence of 'hiring' process
 
-<img src="./images/Postgres-db-bamoedb.png" width="50%" height="50%">
+<img src="./images/Postgres-db-bamoedb.png" width="80%" height="80%">
 
 1.5 Check the presence of 'keycloak' database tables
 

@@ -14,6 +14,9 @@ Minikube environment has been selected as a deployment target environment to dem
 
 The use case involves the use of a simple application based on a BPMN process implemented with two human tasks profiled for two different organizational roles.
 
+<img src="./images/BAMOE9-HiringProcess.png" width="80%" height="80%">
+
+
 Users who interact with the application must be authenticated and provide in each interaction with the application a set of credentials identified by a JWT token obtained through a login operation to an OIDC server (in this scenario Keycloak).
 
 Keycloak has been configured with a customized realm for which two user groups have been created, one for Human Resources users, the other for Information Technology users; two roles 'HR' and 'IT' have been created to which the two user groups have been associated. What is defined as 'Realm Role' in Keycloak corresponds to the configuration in the 'Group' section of the human tasks.

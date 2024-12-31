@@ -4,11 +4,11 @@
 
 This repository contains an example of a 'complete deployment' in a Kubernetes environment for an application based on a BPMN process in IBM BAMOE runtime version 9.1.1 (technical preview for long running processes supported by a database), the application is based on Quarkus technology.
 
-The contents of this repository must be understood as an example of architecture and functional integration in a Kubernetes environment; they are not suitable for reuse in production environments.
+The contents of this repository is a very simple example of architecture and functional integration in a Kubernetes environment. 
+The code and configurations in this repository is not suitable for reuse in production environments.
 As you can see, security enforcements are practically absent or minimal and present (user roles enforcement) for demonstration purposes only.
 
 Minikube environment has been selected as a deployment target environment to demonstrate the simplicity of setup even on the developer's desktop.
-
 
 ## Scenario
 
@@ -199,20 +199,5 @@ the result will be similar to
 }
 ```
 
-
 To complete the process with human tasks, adapt the 'curl' command examples found in the repository from the section https://github.com/marcoantonioni/bamoe9-oidc-processes#3-get-a-list-of-process-instances and following steps.
-
-
-## Conclusions
-
-TBD...
-
-## References
-
-<a href="https://www.ibm.com/docs/en/ibamoe/9.1.x" target="_blank">IBM BAMOE v9.1 Docs</a>
-
-<a href="https://www.ibm.com/docs/en/ibamoe/9.1.x?topic=services-components-process-service" target="_blank">IBM BAMOE v9.1 Compact Architecture</a>
-
-<a href="https://ibm.biz/bamoe-developer-program" target="_blank">IBM BAMOE Developer Program</a>
-
 

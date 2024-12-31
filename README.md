@@ -108,9 +108,9 @@ Expand 'Databases', 'bamoedb' and 'keycloak' must be listed.
 
 Expand databases/<b>bamoedb</b>/schemas/public/tables 
 
-Select table 'definitions'
+Select table 'DEFINITIONS'
 
-Execute 'all-rows' command and check for the presence of 'hiring' process
+Execute 'all-rows' command and check for the presence of 'HIRING' process (see NAME and ID columns)
 
 <img src="./images/Postgres-db-bamoedb.png" width="100%" height="100%">
 
@@ -118,9 +118,9 @@ Execute 'all-rows' command and check for the presence of 'hiring' process
 
 Expand databases/<b>keycloak</b>/schemas/public/tables
 
-Select table 'realms'
+Select table 'REALMS'
 
-Execute 'all-rows' command and scroll right to the '<b>realm</b>' column
+Execute 'all-rows' command and scroll right to the '<b>NAME</b>' column, check for the presence of 'MY-REALM-1'
 
 <img src="./images/Postgres-db-keycloak.png" width="100%" height="100%">
 
@@ -131,11 +131,9 @@ Execute 'all-rows' command and scroll right to the '<b>realm</b>' column
 
  http://minikube:45201/admin/master/console/
 
-<img src="./images/.png" width="50%" height="50%">
-
 2.2 Select realm 'my-realm-1'
 
-<img src="./images/.png" width="50%" height="50%">
+<img src="./images/Keycloak-realms.png" width="80%" height="80%">
 
 2.3 Select Realm Roles and verifiy the presence of 'HR' and 'IT'
 

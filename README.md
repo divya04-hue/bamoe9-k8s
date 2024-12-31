@@ -100,7 +100,7 @@ Don't be alarmed if some pod will report one or more restarts, it will probably 
 
 TBD...
 
-<img src="./images/.png" width="50%" height="50%">
+<img src="./images/PGAdmin-login.png" width="50%" height="50%">
 
 1.3 Check presence of databases
 

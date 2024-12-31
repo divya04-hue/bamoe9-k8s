@@ -106,13 +106,13 @@ Expand 'Databases', 'bamoedb' and 'keycloak' must be listed.
 
 1.4 Check the presence of 'bamoedb' database tables
 
-Expand databases/bamoedb/schemas/public/tables 
+Expand databases/<b>bamoedb</b>/schemas/public/tables 
 
 Select table 'definitions'
 
-Execute query-all and check for the presence of 'hiring' process
+Execute 'query-all' command and check for the presence of 'hiring' process
 
-<img src="./images/.png" width="50%" height="50%">
+<img src="./images/Postgres-db-bamoedb.png" width="50%" height="50%">
 
 1.5 Check the presence of 'keycloak' database tables
 

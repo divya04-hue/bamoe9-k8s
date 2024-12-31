@@ -135,9 +135,9 @@ Execute 'all-rows' command and scroll right to the '<b>NAME</b>' column, check f
 
 <img src="./images/Keycloak-realms.png" width="50%" height="50%">
 
-2.3 Select Realm Roles and verifiy the presence of 'HR' and 'IT'
+2.3 Select Realm Roles and verifiy the presence of '<b>HR</b>' and '<b>IT</b>' roles
 
-<img src="./images/.png" width="50%" height="50%">
+<img src="./images/Keycloak-roles.png" width="50%" height="50%">
 
 
 ## Run Process Instances

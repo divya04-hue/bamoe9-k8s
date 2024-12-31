@@ -133,7 +133,7 @@ Execute 'all-rows' command and scroll right to the '<b>NAME</b>' column, check f
 
 2.2 Select realm 'my-realm-1'
 
-<img src="./images/Keycloak-realms.png" width="80%" height="80%">
+<img src="./images/Keycloak-realms.png" width="50%" height="50%">
 
 2.3 Select Realm Roles and verifiy the presence of 'HR' and 'IT'
 

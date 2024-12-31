@@ -110,19 +110,19 @@ Expand databases/<b>bamoedb</b>/schemas/public/tables
 
 Select table 'definitions'
 
-Execute 'query-all' command and check for the presence of 'hiring' process
+Execute 'all-rows' command and check for the presence of 'hiring' process
 
 <img src="./images/Postgres-db-bamoedb.png" width="100%" height="100%">
 
 1.5 Check the presence of 'keycloak' database tables
 
-Expand databases/keycloak/schemas/public/tables
+Expand databases/<b>keycloak</b>/schemas/public/tables
 
 Select table 'realms'
 
-Execute query-all and scroll to the 'realm' column
+Execute 'all-rows' command and scroll right to the '<b>realm</b>' column
 
-<img src="./images/.png" width="50%" height="50%">
+<img src="./images/Postgres-db-keycloak.png" width="100%" height="100%">
 
 
 <b>2 Check the custom realm configuration in Keycloak</b>

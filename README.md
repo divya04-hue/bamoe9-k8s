@@ -95,10 +95,9 @@ Don't be alarmed if some pod will report one or more restarts, it will probably 
 
 <b>1 Check the Postgres setup and the 'keycloak' and 'bamoe' databases</b>
 
-1.1 Login to the PGAdmin console with username <b>admin<span>@</span>example.com</b> and password <b>admin</b>
- http://minikube:45200/
+1.1 Login to the PGAdmin console http://minikube:45200/ with username '<b>admin<span>@</span>example.com</b>' and password '<b>admin</b>'
 
-1.2 Expand the 'Servers' group and enter password 'myPgPassword'
+1.2 Expand the 'Servers' group and enter password '<b>myPgPassword</b>'
 
 <img src="./images/PGAdmin-login.png" width="80%" height="80%">
 

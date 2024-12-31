@@ -14,7 +14,7 @@ Minikube environment has been selected as a deployment target environment to dem
 
 The use case involves the use of a simple application based on a BPMN process implemented with two human tasks profiled for two different organizational roles.
 
-<img src="./images/BAMOE9-HiringProcess.png" width="80%" height="80%">
+<img src="./images/BAMOE9-HiringProcess.png" width="100%" height="100%">
 
 
 Users who interact with the application must be authenticated and provide in each interaction with the application a set of credentials identified by a JWT token obtained through a login operation to an OIDC server (in this scenario Keycloak).

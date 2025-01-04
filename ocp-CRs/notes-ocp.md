@@ -100,6 +100,30 @@ spec:
 EOF
 ```
 
+# bamoe
+```
+cat <<EOF > ./ocp-CRs/bamoe/route.yaml
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: bamoe
+  namespace: bamoe-ns
+  labels:
+    app: bamoe
+spec:
+  to:
+    kind: Service
+    name: bamoe
+    weight: 100
+  port:
+    targetPort: frontend
+  tls:
+    termination: edge
+  wildcardPolicy: None
+EOF
+```
+
+
 ```
 source ./env-ocp.properties
 
@@ -122,5 +146,8 @@ oc apply -f ./ocp-CRs/pgadmin/route.yaml
 oc create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./${_FOLDER}/keycloak/custom-realm.json 
 oc apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml 
 oc apply -f ./${_FOLDER}/keycloak/route.yaml
+
+oc apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml 
+
 ```
 

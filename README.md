@@ -2,6 +2,11 @@
 
 Work in progress for OCP deployment...
 
+TBD:
+1. Keycloak console error from browser
+2. review all db passwords
+
+
 
 ## Introduction
 

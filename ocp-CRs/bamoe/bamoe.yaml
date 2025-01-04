@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: bamoe
-  namespace: bamoe-ocp
+  namespace: bamoe-ns
   labels:
     app: bamoe
 spec:
@@ -23,7 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bamoe
-  namespace: bamoe-ocp
+  namespace: bamoe-ns
 spec:
   replicas: 1
   selector:
@@ -93,9 +93,9 @@ spec:
             - name: QUARKUS_DATASOURCE_REACTIVE_URL
               value: postgresql://postgres:5432/bamoedb
             - name: QUARKUS_DATASOURCE_USERNAME
-              value: bamoedb-user
+              value: postgres
             - name: QUARKUS_DATASOURCE_PASSWORD
-              value: bamoedb-pass
+              value: myPgPassword
         - name: frontend
           image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
           env:
@@ -126,9 +126,9 @@ spec:
             - name: QUARKUS_LOG_LEVEL
               value: 'INFO'
             - name: QUARKUS_OIDC_AUTH_SERVER_URL
-              value: 'http://minikube:30201/realms/my-realm-1'
+              value: 'http://keycloak:8080/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
-              value: 'http://minikube:30201/realms/my-realm-1'
+              value: 'http://keycloak:8080/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
               value: 'my-client-bpm'
             - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET

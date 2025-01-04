@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: bamoe
+  namespace: bamoe-ns
+  labels:
+    app: bamoe
+spec:
+  to:
+    kind: Service
+    name: bamoe
+    weight: 100
+  port:
+    targetPort: frontend
+  tls:
+    termination: edge
+  wildcardPolicy: None

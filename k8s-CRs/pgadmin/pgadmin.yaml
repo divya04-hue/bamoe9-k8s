@@ -10,7 +10,7 @@ spec:
     app: pgadmin
   type: NodePort
   ports:
-    - nodePort: 45200
+    - nodePort: 30200
       port: 80
       targetPort: 80
 ---

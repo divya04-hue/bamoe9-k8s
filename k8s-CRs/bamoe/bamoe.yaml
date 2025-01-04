@@ -11,11 +11,11 @@ spec:
   type: NodePort
   ports:
     - name: backend
-      nodePort: 45203
+      nodePort: 30203
       port: 8080
       targetPort: 8080
     - name: frontend
-      nodePort: 45202
+      nodePort: 30202
       port: 8880
       targetPort: 8880
 ---
@@ -126,9 +126,9 @@ spec:
             - name: QUARKUS_LOG_LEVEL
               value: 'INFO'
             - name: QUARKUS_OIDC_AUTH_SERVER_URL
-              value: 'http://minikube:45201/realms/my-realm-1'
+              value: 'http://minikube:30201/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
-              value: 'http://minikube:45201/realms/my-realm-1'
+              value: 'http://minikube:30201/realms/my-realm-1'
             - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
               value: 'my-client-bpm'
             - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET

@@ -71,6 +71,9 @@ In the 'configuration/configuration-steps.md' file you will find a series of sni
 
 The log level for BAMOE applications are at 'INFO' level in 'QUARKUS_LOG_LEVEL' enviroment variables for each containers; change it to 'TRACE' if needed.
 
+For Openshift deployment see:
+1. Postgresql --> https://github.com/marcoantonioni/postgresql-openshift-deploy
+
 <b>Warning</b>:
 <mark>
 Authentication and verification of the validity of the JWT token require (frontend policy) among other things that the token has been created from a specific URL that has been configured in the environment variable of the frontend container (QUARKUS_OIDC_AUTH_SERVER_URL and QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL).

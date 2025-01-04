@@ -13,8 +13,15 @@ kubectl apply -f ./${_FOLDER}/bamoe-ns.yaml
 ## create postgres
 ```
 kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./${_FOLDER}/postgres/${_INIT_DB_FILE}
+
+# ???
 kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_PV}.yaml 
 kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml 
+
+# ???
+kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_PV}-techzone.yaml 
+kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_PVC}-techzone.yaml 
+
 kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_SECR_PWD_POSTGRES}.yaml 
 kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml 
 ```

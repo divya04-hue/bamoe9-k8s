@@ -1,9 +1,9 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: bamoe-k8s
+  name: bamoe-ns
   labels:
-    kubernetes.io/metadata.name: bamoe-k8s
+    kubernetes.io/metadata.name: bamoe-ns
 spec:
   finalizers:
     - kubernetes

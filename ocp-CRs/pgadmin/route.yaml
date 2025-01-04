@@ -1,0 +1,18 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: pgadmin
+  namespace: bamoe-ns
+  labels:
+    app: pgadmin
+spec:
+  path: /
+  to:
+    kind: Service
+    name: pgadmin
+    weight: 100
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
+  wildcardPolicy: None

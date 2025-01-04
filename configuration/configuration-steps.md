@@ -7,7 +7,12 @@ Before run any command set all variables in shell env.
 
 ## Environment variables
 ```
+# choose one between
+
 source ./env.properties
+
+# or
+source ./env-ocp.properties
 ```
 
 ## namespace
@@ -28,7 +33,7 @@ EOF
 #--------------------------
 ## storage
 
-### PV
+### PV (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PV}.yaml
 apiVersion: v1
@@ -45,7 +50,7 @@ spec:
 EOF
 ```
 
-### PVC
+### PVC (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml
 apiVersion: v1
@@ -66,7 +71,7 @@ EOF
 
 ## Postgres
 
-### Secret
+### Secret (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_SECR_PWD_POSTGRES}.yaml
 apiVersion: v1
@@ -79,8 +84,13 @@ data:
   password: ${_PG_PWD_ENC}
 EOF
 ```
+#### Deployment (for Openshift)
 
-#### Deployment
+see https://github.com/marcoantonioni/postgresql-openshift-deploy
+
+adatpt initialization commands for file INIT.SQL
+
+#### Deployment (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml
 apiVersion: v1

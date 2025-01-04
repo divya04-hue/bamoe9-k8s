@@ -1,5 +1,8 @@
 # bamoe9-k8s
 
+Work in progress for OCP deployment...
+
+
 ## Introduction
 
 This repository contains an example of a 'complete deployment' in a Kubernetes environment for an application based on a BPMN process in IBM BAMOE runtime version 9.1.1 (technical preview for long running processes supported by a database), the application is based on Quarkus technology.

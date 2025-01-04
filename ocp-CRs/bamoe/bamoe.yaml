@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bamoe
+  namespace: bamoe-ocp
+  labels:
+    app: bamoe
+spec:
+  selector:
+    app: bamoe
+  type: NodePort
+  ports:
+    - name: backend
+      nodePort: 30203
+      port: 8080
+      targetPort: 8080
+    - name: frontend
+      nodePort: 30202
+      port: 8880
+      targetPort: 8880
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bamoe
+  namespace: bamoe-ocp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bamoe
+  template:
+    metadata:
+      labels:
+        app: bamoe
+    spec:
+      containers:
+        - name: backend
+          image: quay.io/marco_antonioni/bamoe9-compact-architecture-security:1.0.0
+          env:
+            - name: KOGITO_DATA_INDEX_URL
+              value: 'http://0.0.0.0:8080'
+            - name: KOGITO_JOBS_SERVICE_URL
+              value: 'http://0.0.0.0:8080'
+            - name: KOGITO_PERSISTENCE_TYPE
+              value: jdbc
+            - name: KOGITO_SERVICE_URL
+              value: 'http://0.0.0.0:8080'
+            - name: QUARKUS_DATASOURCE_DB_KIND
+              value: postgresql
+            - name: QUARKUS_FLYWAY_BASELINE_ON_MIGRATE
+              value: 'true'
+            - name: QUARKUS_FLYWAY_BASELINE_VERSION
+              value: '0.0'
+            - name: QUARKUS_FLYWAY_LOCATIONS
+              value: 'classpath:/db/migration,classpath:/db/jobs-service,classpath:/db/data-audit/postgresql'
+            - name: QUARKUS_FLYWAY_MIGRATE_AT_START
+              value: 'true'
+            - name: QUARKUS_FLYWAY_TABLE
+              value: 'FLYWAY_RUNTIME_SERVICE'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_OIDC_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_OIDC_CLIENT_SCOPE
+              value: 'my-bpm-scope'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_PATHS
+              value: '/hiring/*,/graphql'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_POLICY
+              value: 'mybackendsecpolicy'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_ONLY_AUTHENTICATED
+              value: 'true'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_ONLY_LOCALHOST
+              value: 'true'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BACKEND_VALIDATE_SERVICE_HEADER
+              value: 'true'
+            - name: QUARKUS_HTTP_CORS
+              value: 'true'
+            - name: QUARKUS_HTTP_CORS_ORIGINS
+              value: '*'
+            - name: QUARKUS_KOGITO_DATA_INDEX_GRAPHQL_UI_ALWAYS_INCLUDE
+              value: 'true'
+            - name: QUARKUS_KOGITO_DEVSERVICES_ENABLED
+              value: 'false'
+            - name: QUARKUS_LOG_LEVEL
+              value: 'INFO'
+            - name: QUARKUS_OIDC_ENABLED
+              value: 'false'
+            - name: QUARKUS_SMALLRYE_OPENAPI_PATH
+              value: '/docs/openapi.json'
+            - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
+              value: 'false'
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://postgres:5432/bamoedb
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: postgresql://postgres:5432/bamoedb
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: bamoedb-user
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: bamoedb-pass
+        - name: frontend
+          image: quay.io/marco_antonioni/bamoe9-process-jwt-security:1.0.0
+          env:
+            - name: MARCO_BAMOE_PROCESS_STARTER_ROLES_HIRING
+              value: 'HR'
+            - name: MARCO_BAMOE_PROCESS_VIEWER_ROLES
+              value: 'HR'
+            - name: MARCO_STUDIO_CACHE_NAME
+              value: 'myServiceId'
+            - name: MARCO_STUDIO_RESTCLIENT_MYBAMOERESTCLIENT_MP_REST_URL
+              value: 'http://localhost:8080'
+            - name: MARCO_STUDIO_VALIDATE_TOKEN_SCOPE
+              value: 'my-bpm-scope'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_EXPIRE_AFTER_WRITE
+              value: '10S'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_INITIAL_CAPACITY
+              value: '100'
+            - name: QUARKUS_CACHE_CAFFEINE_MYSERVICEID_MAXIMUM_SIZE
+              value: '1000'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BAMOE_PATHS
+              value: '/bamoe/*'
+            - name: QUARKUS_HTTP_AUTH_PERMISSION_BAMOE_POLICY
+              value: 'myfrontendsecpolicy'
+            - name: QUARKUS_HTTP_HOST
+              value: '0.0.0.0'
+            - name: QUARKUS_HTTP_PORT
+              value: '8880'
+            - name: QUARKUS_LOG_LEVEL
+              value: 'INFO'
+            - name: QUARKUS_OIDC_AUTH_SERVER_URL
+              value: 'http://minikube:30201/realms/my-realm-1'
+            - name: QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL
+              value: 'http://minikube:30201/realms/my-realm-1'
+            - name: QUARKUS_OIDC_CLIENT_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_OIDC_CLIENT_CREDENTIALS_SECRET
+              value: 'my-secret-bpm'
+            - name: QUARKUS_OIDC_CLIENT_ID
+              value: 'my-client-bpm'
+            - name: QUARKUS_OIDC_CREDENTIALS_SECRET
+              value: 'my-secret-bpm'
+            - name: QUARKUS_SMALLRYE_OPENAPI_PATH
+              value: '/docs/openapi.json'
+            - name: QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE
+              value: 'true'

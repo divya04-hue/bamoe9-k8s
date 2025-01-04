@@ -45,22 +45,6 @@ spec:
 EOF
 ```
 
-### PV OCP TechZone
-```
-cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PV}-techzone.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgres-bamoe-pv
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: managed-nfs-storage
-EOF
-```
-
 ### PVC
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml
@@ -74,25 +58,6 @@ spec:
   volumeName: ${_CR_NAME_PV}
   accessModes:
   - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-EOF
-```
-
-### PVC OCP TechZone
-```
-cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PVC}-techzone.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-bamoe-pvc
-  namespace: bamoe-k8s
-spec:
-  storageClassName: managed-nfs-storage
-  accessModes:
-    - ReadWriteOnce
-  volumeMode: Filesystem
   resources:
     requests:
       storage: 5Gi

@@ -75,6 +75,31 @@ spec:
 EOF
 ```
 
+# Keycloak
+
+```
+cat <<EOF > ./ocp-CRs/keycloak/route.yaml
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: keycloak
+  namespace: bamoe-ns
+  labels:
+    app: keycloak
+spec:
+  path: /
+  to:
+    kind: Service
+    name: keycloak
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+  wildcardPolicy: None
+EOF
+```
+
 ```
 source ./env-ocp.properties
 
@@ -93,5 +118,9 @@ oc create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./$
 
 oc apply -f ./ocp-CRs/pgadmin/pgadmin.yaml
 oc apply -f ./ocp-CRs/pgadmin/route.yaml
+
+oc create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./${_FOLDER}/keycloak/custom-realm.json 
+oc apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml 
+
 ```
 

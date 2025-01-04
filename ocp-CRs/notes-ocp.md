@@ -148,6 +148,7 @@ oc apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml
 oc apply -f ./${_FOLDER}/keycloak/route.yaml
 
 oc apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml 
+oc apply -f ./${_FOLDER}/bamoe/route.yaml 
 
 ```
 

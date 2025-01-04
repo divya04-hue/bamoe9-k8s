@@ -80,6 +80,7 @@ source ./env-ocp.properties
 
 kubectl apply -f ./${_FOLDER}/bamoe-ns.yaml 
 
+kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_SECR_PWD_POSTGRES}.yaml 
 kubectl apply --validate=false -f ./${_FOLDER}/postgres/postgres.yaml
 
 oc adm policy add-scc-to-group anyuid system:serviceaccounts:bamoe-ns

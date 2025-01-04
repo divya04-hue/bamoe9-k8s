@@ -79,10 +79,7 @@ items:
           - name: POSTGRESQL_USER
             value: postgres
           - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgres-pwd-secret
-                key: password            
+            value: myPgPassword
           - name: POSTGRESQL_DATABASE
             value: postgres
           image: ' '

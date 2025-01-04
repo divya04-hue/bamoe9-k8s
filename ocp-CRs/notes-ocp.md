@@ -1,18 +1,4 @@
 
-```
-source ./env-ocp.properties
-```
-
-```
-kubectl apply -f ./${_FOLDER}/bamoe-ns.yaml 
-```
-
-
-# Postgres
-```
-kubectl apply --validate=false -f ./${_FOLDER}/postgres/postgres.yaml
-```
-
 # PGAdmin
 ```
 cat <<EOF > ./ocp-CRs/pgadmin/scc.yaml
@@ -90,6 +76,12 @@ EOF
 ```
 
 ```
+source ./env-ocp.properties
+
+kubectl apply -f ./${_FOLDER}/bamoe-ns.yaml 
+
+kubectl apply --validate=false -f ./${_FOLDER}/postgres/postgres.yaml
+
 oc adm policy add-scc-to-group anyuid system:serviceaccounts:bamoe-ns
 oc create -f ./ocp-CRs/pgadmin/scc.yaml -n bamoe-ns
 oc create -f ./ocp-CRs/pgadmin/roles.yaml -n bamoe-ns

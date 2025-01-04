@@ -121,6 +121,6 @@ oc apply -f ./ocp-CRs/pgadmin/route.yaml
 
 oc create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./${_FOLDER}/keycloak/custom-realm.json 
 oc apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml 
-
+oc apply -f ./${_FOLDER}/keycloak/route.yaml
 ```
 

@@ -396,6 +396,27 @@ spec:
 EOF
 ```
 
+### Keycloak Route
+cat <<EOF > ./${_FOLDER}/keycloak/route.yaml
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ${_CR_NAME_DEP_KC}
+  namespace: ${_NS}
+  labels:
+    app: keycloak
+spec:
+  path: /
+  to:
+    kind: Service
+    name: keycloak
+    weight: 100
+  port:
+    targetPort: 8080
+  wildcardPolicy: None
+EOF
+```
+
 ## BAMOE application
 ```
 cat <<EOF > ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml

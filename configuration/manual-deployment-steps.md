@@ -72,6 +72,11 @@ kubectl apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml
 ```
 kubectl apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml 
 kubectl apply -f ./${_FOLDER}/bamoe/route.yaml 
+KEYCLOAK_URL="http://"$(oc get route -n ${_NS} keycloak -o jsonpath='{.spec.host}')
+_OIDC_URL="${KEYCLOAK_URL}/realms/my-realm-1"
+kubectl set env deployment/bamoe -c frontend QUARKUS_OIDC_AUTH_SERVER_URL=${_OIDC_URL}
+kubectl set env deployment/bamoe -c frontend QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL=${_OIDC_URL}
+
 ```
 
 

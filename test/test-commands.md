@@ -29,8 +29,7 @@ echo "Token scopes: ${KC_TOKEN_SCOPE}"
 
 ## Login token (OCP)
 ```
-# KEYCLOAK_URL="https://"$(oc get route -n ${_NS} keycloak -o jsonpath='{.spec.host}')
-KEYCLOAK_URL="http://"$(oc get route -n ${_NS} keycloak2 -o jsonpath='{.spec.host}')
+KEYCLOAK_URL="http://"$(oc get route -n ${_NS} keycloak -o jsonpath='{.spec.host}')
 BAMOE_URL="https://"$(oc get route -n ${_NS} bamoe -o jsonpath='{.spec.host}')
 
 USER_NAME=alice

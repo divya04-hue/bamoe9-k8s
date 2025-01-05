@@ -11,9 +11,6 @@ source ${_ENV_PROPS}
 echo "===>> Delete namespace"
 kubectl delete -f ./${_FOLDER}/bamoe-ns.yaml
 
-echo "===>> Delete ROLES"
-kubectl delete -f ./${_FOLDER}/pgadmin/roles.yaml
-
 echo "===>> Delete SCC"
 kubectl delete -f ./${_FOLDER}/pgadmin/scc.yaml
 

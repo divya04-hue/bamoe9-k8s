@@ -64,10 +64,15 @@ kubectl apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml
 kubectl apply -f ./${_FOLDER}/keycloak/route.yaml
 ```
 
-
-## create bamoe application
+## create bamoe application (K8S only)
 ```
 kubectl apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml 
+```
+
+## create bamoe application (Openshift only)
+```
+kubectl apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml 
+kubectl apply -f ./${_FOLDER}/bamoe/route.yaml 
 ```
 
 

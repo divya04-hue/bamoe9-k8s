@@ -545,5 +545,29 @@ spec:
 EOF
 ```
 
+### BAMOE Route
+
+```
+cat <<EOF > ./${_FOLDER}/bamoe/route.yaml
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ${_CR_NAME_DEP_BAMOE}
+  namespace: ${_NS}
+  labels:
+    app: bamoe
+spec:
+  to:
+    kind: Service
+    name: ${_CR_NAME_DEP_BAMOE}
+    weight: 100
+  port:
+    targetPort: frontend
+  tls:
+    termination: edge
+  wildcardPolicy: None
+EOF
+```
+
 
 

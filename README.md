@@ -1,7 +1,5 @@
 # bamoe9-k8s
 
-Work in progress for OCP deployment...
-
 TBD:
 1. OCP: Keycloak console error from browser
 2. OCP: OIDC verification from BAMOE pod use HTTP (investigate how to set HTTPS) 
@@ -18,6 +16,8 @@ The code and configurations in this repository is not suitable for reuse in prod
 As you can see, security enforcements are practically absent or minimal and present (user roles enforcement) for demonstration purposes only.
 
 Minikube environment has been selected as a deployment target environment to demonstrate the simplicity of setup even on the developer's desktop.
+
+For configuration and distribution in Openshift see file with "*-ocp" suffix.
 
 ## Scenario
 

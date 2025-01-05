@@ -4,6 +4,7 @@ Work in progress for OCP deployment...
 
 TBD:
 1. OCP: Keycloak console error from browser
+2. OCP: Test OIDC verification use HTTP (investigate how to set HTTPS) 
 
 Ignore initial deployment pod's restarts, Keycloak server is slower than its clients.
 

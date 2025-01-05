@@ -76,7 +76,14 @@ kubectl apply -f ./${_FOLDER}/bamoe/${_CR_NAME_DEP_BAMOE}.yaml
 ## remove all
 ```
 kubectl delete -f ./${_FOLDER}/bamoe-ns.yaml
+
+# only K8S
 kubectl delete -f ./${_FOLDER}/postgres/postgres-bamoe-pv.yaml 
+
+# only OCP
+kubectl delete -f ./${_FOLDER}/pgadmin/scc.yaml
+kubectl delete -f ./${_FOLDER}/pgadmin/roles.yaml
+
 ```
 
 ```

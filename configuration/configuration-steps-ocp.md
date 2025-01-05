@@ -385,10 +385,7 @@ spec:
             - name: KC_DB_USERNAME
               value: ${_PG_USER}
             - name: KC_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ${_CR_NAME_SECR_PWD_POSTGRES}
-                  key: password            
+              value: ${_PG_PWD}
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import

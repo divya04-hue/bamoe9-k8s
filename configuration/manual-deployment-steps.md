@@ -48,7 +48,6 @@ kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./${_
 kubectl create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./${_FOLDER}/pgadmin/my-passwords.pgpass
 kubectl apply -f ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml 
 kubectl apply -f ./${_FOLDER}/pgadmin/route.yaml
-
 ```
 
 ## create keycloak (K8S only)

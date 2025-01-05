@@ -3,8 +3,9 @@
 Work in progress for OCP deployment...
 
 TBD:
-1. Keycloak console error from browser
+1. OCP: Keycloak console error from browser
 
+Ignore initial deployment pod's restarts, Keycloak server is slower than its clients.
 
 ## Introduction
 

@@ -1,5 +1,5 @@
 
-# Configuration steps to deploy into K8S (this scenario: minikube)
+# Configuration steps to deploy into OCP
 
 Following snippets are used to generate CRs for various components.
 
@@ -7,11 +7,6 @@ Before run any command set all variables in shell env.
 
 ## Environment variables
 ```
-# choose one between
-
-source ./env.properties
-
-# or
 source ./env-ocp.properties
 ```
 
@@ -33,24 +28,6 @@ EOF
 #--------------------------
 ## storage
 
-### PV (only minikube or other without storage classes)
-```
-cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PV}.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: ${_CR_NAME_PV}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 5Gi
-  hostPath:
-    path: /data/${_CR_NAME_PV}
-EOF
-```
-
-### PVC (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml
 apiVersion: v1
@@ -59,38 +36,20 @@ metadata:
   name: ${_CR_NAME_PVC}
   namespace: ${_NS}
 spec:
-  storageClassName: ""
-  volumeName: ${_CR_NAME_PV}
   accessModes:
   - ReadWriteOnce
+  storageClassName: managed-nfs-storage
   resources:
     requests:
       storage: 5Gi
 EOF
 ```
 
+
 ## Postgres
 
-### Secret (only minikube or other without storage classes)
-```
-cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_SECR_PWD_POSTGRES}.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${_CR_NAME_SECR_PWD_POSTGRES}
-  namespace: ${_NS}
-type: Opaque
-data:
-  password: ${_PG_PWD_ENC}
-EOF
-```
-#### Deployment (for Openshift)
+#### Deployment 
 
-see https://github.com/marcoantonioni/postgresql-openshift-deploy
-
-adatpt initialization commands for file INIT.SQL
-
-#### Deployment (only minikube or other without storage classes)
 ```
 cat <<EOF > ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml
 apiVersion: v1
@@ -131,10 +90,7 @@ spec:
             - containerPort: ${_CR_NAME_DEP_POSTGRES_PORT}
           env:
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ${_CR_NAME_SECR_PWD_POSTGRES}
-                  key: password            
+              value: ${_PG_PWD}
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgresdata

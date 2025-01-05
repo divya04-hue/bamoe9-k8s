@@ -26,6 +26,9 @@ kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml
 
 ## create postgres (Openshift only)
 ```
+kubectl create configmap -n ${_NS} pg-init-db --from-file=init.sql=./${_FOLDER}/postgres/${_INIT_DB_FILE}
+kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_PVC}.yaml 
+kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml 
 ```
 
 

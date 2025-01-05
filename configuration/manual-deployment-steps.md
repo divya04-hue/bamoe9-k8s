@@ -32,18 +32,38 @@ kubectl apply -f ./${_FOLDER}/postgres/${_CR_NAME_DEP_POSTGRES}.yaml
 ```
 
 
-## create pgadmin
+## create pgadmin (K8S only)
 ```
 kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./${_FOLDER}/pgadmin/servers.json
 kubectl create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./${_FOLDER}/pgadmin/my-passwords.pgpass
 kubectl apply -f ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml 
+
 ```
 
-## create keycloak
+## create pgadmin (Openshift only)
+```
+kubectl create -f ./${_FOLDER}/pgadmin/scc.yaml
+kubectl apply -f ./${_FOLDER}/pgadmin/roles.yaml
+kubectl create configmap -n ${_NS} pgadmin-config --from-file=servers.json=./${_FOLDER}/pgadmin/servers.json
+kubectl create configmap -n ${_NS} pgadmin-passwd --from-file=my-passwords.pgpass=./${_FOLDER}/pgadmin/my-passwords.pgpass
+kubectl apply -f ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml 
+kubectl apply -f ./${_FOLDER}/pgadmin/route.yaml
+
+```
+
+## create keycloak (K8S only)
 ```
 kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./${_FOLDER}/keycloak/custom-realm.json 
 kubectl apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml 
 ```
+
+## create keycloak (Openshift only)
+```
+kubectl create configmap -n ${_NS} ${_REALM_NAME} --from-file=${_REALM_NAME}.json=./${_FOLDER}/keycloak/custom-realm.json 
+kubectl apply -f ./${_FOLDER}/keycloak/${_CR_NAME_DEP_KC}.yaml 
+kubectl apply -f ./${_FOLDER}/keycloak/route.yaml
+```
+
 
 ## create bamoe application
 ```

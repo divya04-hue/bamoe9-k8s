@@ -3,6 +3,12 @@ apiVersion: security.openshift.io/v1
 metadata:
   name: scc-pga
 allowPrivilegedContainer: false
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+readOnlyRootFilesystem: false
 runAsUser:
   type: MustRunAsRange
   uidRangeMin: 5000

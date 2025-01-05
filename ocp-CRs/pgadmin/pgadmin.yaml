@@ -19,7 +19,7 @@ kind: Deployment
 metadata:
   name: pgadmin
   namespace: bamoe-ns
-spec:  
+spec:
   selector:
    matchLabels:
     app: pgadmin

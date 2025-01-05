@@ -182,6 +182,68 @@ ${_CR_NAME_DEP_POSTGRES}:${_CR_NAME_DEP_POSTGRES_PORT}:bamoedb:${_PG_USER}:${_PG
 EOF
 ```
 
+### SCC
+
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/scc.yaml
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: scc-pga
+allowPrivilegedContainer: false
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+readOnlyRootFilesystem: false
+runAsUser:
+  type: MustRunAsRange
+  uidRangeMin: 5000
+  uidRangeMax: 6000
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: MustRunAs
+  ranges:
+  - min: 5000
+    max: 6000
+supplementalGroups:
+  type: MustRunAs
+  ranges:
+  - min: 5000
+    max: 6000
+EOF
+```
+
+### Roles
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/roles.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: role-pga
+rules:
+  - apiGroups: ["security.openshift.io"]
+    resources: ["securitycontextconstraints"]
+    resourceNames: ["scc-pga"]
+    verbs: ["use"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: role-binding-pga
+subjects:
+  - kind: ServiceAccount
+    name: sa-pga
+roleRef:
+  kind: Role
+  name: role-pga
+  apiGroup: rbac.authorization.k8s.io
+EOF
+```
+
+
 ### Deployment
 ```
 cat <<EOF > ./${_FOLDER}/pgadmin/${_CR_NAME_DEP_PGADMIN}.yaml
@@ -246,6 +308,30 @@ spec:
         - name: pgadmin-passwd
           configMap:
             name: pgadmin-passwd       
+EOF
+```
+
+### Route
+```
+cat <<EOF > ./${_FOLDER}/pgadmin/route.yaml
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ${_CR_NAME_DEP_PGADMIN}
+  namespace: ${_NS}
+  labels:
+    app: ${_CR_NAME_DEP_PGADMIN}
+spec:
+  path: /
+  to:
+    kind: Service
+    name: ${_CR_NAME_DEP_PGADMIN}
+    weight: 100
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
+  wildcardPolicy: None
 EOF
 ```
 

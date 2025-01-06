@@ -10,7 +10,7 @@ spec:
     app: keycloak
   type: NodePort
   ports:
-    - nodePort: 30201
+    - nodePort: 45201
       port: 8080
       targetPort: 8080
 ---

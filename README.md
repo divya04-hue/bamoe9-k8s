@@ -7,7 +7,7 @@ TBD:
 * 2.1 Workaround using url Keycloak (route) with HTTP ... only for demo
 
 
-Ignore initial deployment pod's restarts, Keycloak server is slower than its clients.
+*Please note: Ignore initial deployment pod's restarts, Keycloak server is slower than its clients.*
 
 ## Introduction
 

@@ -2,9 +2,11 @@
 
 TBD:
 1. OCP: Keycloak console error from browser
+
 1.1 Investigate https://github.com/keycloak/keycloak/issues/22491
 
 2. OCP: OIDC verification from BAMOE pod use HTTP (investigate how to set HTTPS) 
+
 2.1 OCP: workaround using url Keycloak (route) with HTTP ... only for demo
 
 

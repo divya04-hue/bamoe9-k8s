@@ -19,7 +19,7 @@ As you can see, security enforcements are practically absent or minimal and pres
 
 Minikube environment has been selected as a deployment target environment to demonstrate the simplicity of setup even on the developer's desktop.
 
-For configuration and distribution in Openshift see file with "*-ocp" suffix.
+For configuration and deployment in Openshift see file with "*-ocp" suffix.
 
 ## Scenario
 
